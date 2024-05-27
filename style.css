@@ -12,13 +12,16 @@ dark shades: #2C3140
     padding: 0.5em;
 }
 
+#title {
+    height: 5%;
+}
+
 #menu {
-    /* margin: 1em 0 1em; */
     height: 5%;
 }
 
 #tabs {
-    height: 95%;
+    height: 90%;
 }
 
 #item-list {
