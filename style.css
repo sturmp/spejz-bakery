@@ -13,15 +13,21 @@ dark shades: #2C3140
 }
 
 #title {
-    height: 5%;
+    height: 13%;
+    text-align: center;
+    padding-top: 1em;
 }
 
 #menu {
-    height: 5%;
+    height: 10%;
+    margin-bottom: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #tabs {
-    height: 90%;
+    height: 77%;
 }
 
 #item-list {
@@ -81,14 +87,12 @@ dark shades: #2C3140
 /* Boostrap override */
 .nav-pills .nav-link.active {
     background-color: #FFFFFF;
-    color: black;
+    color: #9E876D;
+    font-weight: bold;
 }
 
 .nav-item .nav-link {
     border-radius: 0px;
-    color: black;
-}
-
-#menu .hidden {
-    border-left: 0.15em dotted #2C3140;
+    color: #2C3140;
+    font-weight: bold;
 }
