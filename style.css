@@ -1,0 +1,91 @@
+/*
+primary: #5AA06B
+light accent: #9E876D
+dark accent: #726267
+light shades: #FFFFFF
+dark shades: #2C3140
+*/
+
+#main {
+    width: auto;
+    height: 100vh;
+    padding: 0.5em;
+}
+
+#menu {
+    /* margin: 1em 0 1em; */
+    height: 5%;
+}
+
+#tabs {
+    height: 95%;
+}
+
+#item-list {
+    height: 100%;
+}
+
+#item-list .row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 8%;
+    border-bottom: 0.15em dotted #2C3140;
+}
+
+.item {
+    font-weight: bold;
+}
+
+#item-list .row.hidden,
+#calendar .row.hidden {
+    height: 0%;
+    border-bottom: 0.15em dotted #2C3140;
+}
+
+#calendar {
+    overflow-x: auto;
+    height: 100%;
+}
+
+#calendar .row {
+    height: 12%;
+    border-bottom: 0.15em dotted #2C3140;
+}
+
+.day {
+    font-weight: bold;
+    height: 100%;
+    border-right: 0.15em dotted #2C3140;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.order {
+    height: 100%;
+    width: fit-content;
+    background-color: #FFFFFF;
+    border-right: 0.15em dotted #2C3140;
+    
+    text-wrap: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Boostrap override */
+.nav-pills .nav-link.active {
+    background-color: #FFFFFF;
+    color: black;
+}
+
+.nav-item .nav-link {
+    border-radius: 0px;
+    color: black;
+}
+
+#menu .hidden {
+    border-left: 0.15em dotted #2C3140;
+}
