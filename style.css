@@ -14,9 +14,10 @@ body {
 }
 
 #main {
-    width: 100vw;
+    width: auto;
     height: 100vh;
     padding: 0.5em;
+    margin: auto;
 }
 
 #title {
@@ -51,6 +52,7 @@ body {
     align-items: center;
     height: 8%;
     border-bottom: 0.15em dotted #2C3140;
+    --bs-gutter-x: 0;
 }
 
 .item {
@@ -63,6 +65,11 @@ body {
     border-bottom: 0.15em dotted #2C3140;
 }
 
+#calendar {
+    overflow-x: auto;
+    height: 100%;
+}
+
 h3 {
     text-align: center;
     display: flex;
@@ -72,14 +79,10 @@ h3 {
     margin-bottom: 1em;
 }
 
-#calendar {
-    overflow-x: auto;
-    height: 100%;
-}
-
 #calendar .row {
     height: 12%;
     border-bottom: 0.15em dotted #2C3140;
+    --bs-gutter-x: 0;
 }
 
 .day {
