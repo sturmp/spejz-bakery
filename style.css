@@ -26,6 +26,10 @@ dark shades: #2C3140
     align-items: center;
 }
 
+#menu img{
+    height: 2em;
+}
+
 #tabs {
     height: 79%;
 }
@@ -101,6 +105,7 @@ h3 {
     background-color: #FFFFFF;
     color: #9E876D;
     font-weight: bold;
+    border: 0.15em dotted #9E876D;
 }
 
 .nav-item .nav-link {
