@@ -7,13 +7,13 @@ dark shades: #2C3140
 */
 
 #main {
-    width: auto;
+    width: 100vw;
     height: 100vh;
     padding: 0.5em;
 }
 
 #title {
-    height: 13%;
+    height: 11%;
     text-align: center;
     padding-top: 1em;
 }
@@ -27,7 +27,7 @@ dark shades: #2C3140
 }
 
 #tabs {
-    height: 77%;
+    height: 79%;
 }
 
 #item-list {
@@ -52,6 +52,15 @@ dark shades: #2C3140
     border-bottom: 0.15em dotted #2C3140;
 }
 
+h3 {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 1em;
+}
+
 #calendar {
     overflow-x: auto;
     height: 100%;
@@ -65,11 +74,13 @@ dark shades: #2C3140
 .day {
     font-weight: bold;
     height: 100%;
+    border-left: 0.15em dotted #2C3140;
     border-right: 0.15em dotted #2C3140;
     
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
 }
 
 .order {
@@ -82,6 +93,7 @@ dark shades: #2C3140
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
 }
 
 /* Boostrap override */
@@ -95,4 +107,9 @@ dark shades: #2C3140
     border-radius: 0px;
     color: #2C3140;
     font-weight: bold;
+    border: 0.15em dotted #2C3140;
+}
+
+.nav-item-hidden {
+    margin: 0.5em;
 }
