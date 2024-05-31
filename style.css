@@ -50,13 +50,29 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 8%;
+    height: 15%;
     border-bottom: 0.15em dotted #2C3140;
     --bs-gutter-x: 0;
 }
 
 .item {
     font-weight: bold;
+}
+
+.item span {
+    font-weight: initial;
+}
+
+.price {
+    padding-right: 0.3em;
+    display: flex;
+    justify-content: right;
+    font-weight: bold;
+}
+
+.unit-weight span {
+    font-style: italic;
+    font-weight: initial;
 }
 
 #item-list .row.hidden,
