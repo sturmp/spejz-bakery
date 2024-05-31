@@ -59,6 +59,11 @@ body {
     font-weight: bold;
 }
 
+.item a {
+    color: #9E876D;
+    text-decoration: none;
+}
+
 .item span {
     font-weight: initial;
 }
