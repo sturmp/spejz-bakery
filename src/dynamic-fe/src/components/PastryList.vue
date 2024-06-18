@@ -54,7 +54,7 @@
 
 .item-row {
     display: grid;
-    grid-template-columns: 6fr 2em 6em;
+    grid-template-columns: 6fr 2em 5.5em;
     border-bottom: 0.15em dotted #2C3140;
     align-items: center;
     flex: 1 1 auto;

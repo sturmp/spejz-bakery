@@ -1,21 +1,36 @@
 <script setup>
+import { ref } from 'vue'
+
+const emit = defineEmits(['switch-to-pastrylist', 'switch-to-ordercalendar'])
+
+const pastryListActive = ref(true)
+const orderCalendarActive = ref(false)
+
+function handlePastryListClick() {
+    pastryListActive.value = true;
+    orderCalendarActive.value = false;
+    emit('switch-to-pastrylist');
+}
+
+function handleOrderCalendarClick() {
+    pastryListActive.value = false;
+    orderCalendarActive.value = true;
+    emit('switch-to-ordercalendar');
+}
+
 </script>
 
 <template>
     <div id="header">
         <h1 id="title">Spejz Pékség</h1>
         <div id="menu">
-            <div class="menu-item">
-                <a href="#item-list">
-                    <img src="../assets/imgs/sourdough.png">
-                    <img src="../assets/imgs/cinnamon-roll.png">
-                    <img src="../assets/imgs/akara.png">
-                </a>
+            <div class="menu-item" :class="{active: pastryListActive}" @click="handlePastryListClick()" >
+                <img src="../assets/imgs/sourdough.png">
+                <img src="../assets/imgs/cinnamon-roll.png">
+                <img src="../assets/imgs/akara.png">
             </div>
-            <div class="menu-item">
-                <a href="#calendar">
-                    <img src="../assets/imgs/calendar_02.png">
-                </a>
+            <div class="menu-item" :class="{active: orderCalendarActive}" @click="handleOrderCalendarClick()">
+                <img src="../assets/imgs/calendar_02.png">
             </div>
         </div>
     </div>
@@ -49,10 +64,15 @@
 
 .menu-item {
     display: flex;
-    border: 0.15em dotted #9E876D;
+    border: 0.15em dotted #2C3140;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
     justify-content: center;
+    cursor: pointer;
+}
+
+.active {
+    border: 0.15em dotted #9E876D;
 }
 
 img{
