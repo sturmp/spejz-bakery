@@ -1,0 +1,8 @@
+@import './base.css';
+
+#app {
+  width: auto;
+  height: 100vh;
+  padding: 0.5em;
+  margin: auto;
+}
