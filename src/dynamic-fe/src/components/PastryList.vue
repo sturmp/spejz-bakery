@@ -1,42 +1,23 @@
 <script setup>
+import { ref } from 'vue';
+
+const pastries = ref(null);
+
+const url = "http://localhost:5555/pastry";
+async function fetchPastries() {
+    pastries.value = await (await fetch(url)).json();
+}
+
+fetchPastries();
+
 </script>
 
 <template>
     <div id="item-list">
-        <div class="item-row">
-            <div class="item">Biscuit<span>: nem az az édes, ez sós... Vajas pogácsa jó?! Vajas pogácsa!</span></div>
-            <div class="price">3500</div>
-            <div class="unit-weight">/kg</div>
-        </div>
-        <div class="item-row">
-            <div class="item">Foccacia<span>: Olasz olajos kenyér lángos... Feltét nélkül.</span></div>
-            <div class="price">~440</div>
-            <div class="unit-weight">/db <span>(~125g)</span></div>
-        </div>
-        <div class="item-row">
-            <div class="item">Kenyér<span>: Sima kenyér. Semmi extra.</span></div>
-            <div class="price">600</div>
-            <div class="unit-weight">/db <span>(750g)</span></div>
-        </div>
-        <div class="item-row">
-            <div class="item">English muffin<span>: Nem, ez nem az édesség. <a href="https://www.google.com/search?client=firefox-b-d&q=english+muffin">Nézz utána!</a></span></div>
-            <div class="price">150</div>
-            <div class="unit-weight">/db <span>(65g)</span></div>
-        </div>
-        <div class="item-row">
-            <div class="item">Kakaós csiga<span>: Kakaós és fel van tekerve.</span></div>
-            <div class="price">500</div>
-            <div class="unit-weight">/db <span>(100g)</span></div>
-        </div>
-        <div class="item-row">
-            <div class="item">Tortilla<span>: Mexikói lapos lángos. Kaja origami.</span></div>
-            <div class="price">100</div>
-            <div class="unit-weight">/db <span>(~20cm)</span></div>
-        </div>
-        <div class="item-row">
-            <div class="item">Heti különlegesség<span>: Bagel. Te a kutyára gondolsz, de az beagle. Ez olyan mint a szalagos fánk csak sós.</span></div>
-            <div class="price">350</div>
-            <div class="unit-weight">/db <span>(~100g)</span></div>
+        <div class="item-row" v-for="pastry in pastries" :key="pastry.Name">
+            <div class="item">{{ pastry.Name }}<span v-html="': ' + pastry.Description"></span></div>
+            <div class="price">{{ pastry.Price }}</div>
+            <div class="unit-weight">/{{ pastry.UnitOfMeasure}}<span v-if="pastry.QuantityPerPiece != ''"> ({{ pastry.QuantityPerPiece}})</span></div>
         </div>
     </div>
 </template>
