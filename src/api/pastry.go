@@ -15,21 +15,20 @@ type Pastry struct {
 }
 
 func GetPastries(response http.ResponseWriter, request *http.Request) {
-	rows, err := db.Query("select name, price from pastry")
+	rows, err := db.Query("select name, description, price, unitofmeasure, quantityperpiece from pastry")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	pastriesFromDB := map[string]string{}
+	pastriesFromDB := []Pastry{}
 	for rows.Next() {
-		var name string
-		var price string
-		err = rows.Scan(&name, &price)
+		var pastry Pastry
+		err = rows.Scan(&pastry.Name, &pastry.Description, &pastry.Price, &pastry.UnitOfMeasure, &pastry.QuantityPerPiece)
 		if err != nil {
 			log.Fatal(err)
 		}
-		pastriesFromDB[name] = price
+		pastriesFromDB = append(pastriesFromDB, pastry)
 	}
 	err = rows.Err()
 	if err != nil {
