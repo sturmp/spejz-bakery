@@ -46,7 +46,7 @@ func GetOrders(response http.ResponseWriter, request *http.Request) {
 	encoder.Encode(orders)
 }
 
-func CreateOrders(response http.ResponseWriter, request *http.Request) {
+func CreateOrder(response http.ResponseWriter, request *http.Request) {
 	var order Order
 
 	err := json.NewDecoder(request.Body).Decode(&order)

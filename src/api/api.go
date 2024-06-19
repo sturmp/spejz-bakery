@@ -29,6 +29,13 @@ var initialOrders []Order = []Order{
 
 var db *sql.DB
 
+func corsAllowAllOrigin(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		f(w, r)
+	}
+}
+
 func main() {
 	if _, err := os.Stat("bakery.db"); err != nil {
 		db = InitDb()
@@ -38,9 +45,9 @@ func main() {
 	defer db.Close()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/pastry", GetPastries).Methods("GET")
-	router.HandleFunc("/order", GetOrders).Methods("GET")
-	router.HandleFunc("/order", CreateOrders).Methods("POST")
+	router.HandleFunc("/pastry", corsAllowAllOrigin(GetPastries)).Methods("GET")
+	router.HandleFunc("/order", corsAllowAllOrigin(GetOrders)).Methods("GET")
+	router.HandleFunc("/order", corsAllowAllOrigin(CreateOrder)).Methods("POST")
 
 	http.ListenAndServe(":5555", router)
 }
