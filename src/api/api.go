@@ -27,6 +27,14 @@ var initialOrders []Order = []Order{
 	{"English muffin", "Roland", 14, time.Now().AddDate(0, 0, 2)},
 }
 
+var initialSchedules []BakingSchedule = []BakingSchedule{
+	{"kakaós csiga", 12, 5, time.Now()},
+	{"kenyér", 2, 1, time.Now()},
+	{"kenyér", 2, 2, time.Now().AddDate(0, 0, 1)},
+	{"Heti különlegesség", 5, 15, time.Now().AddDate(0, 0, 1)},
+	{"Biscuit", 0.5, 0.5, time.Now().AddDate(0, 0, 1)},
+}
+
 var db *sql.DB
 
 func corsAllowAllOrigin(f http.HandlerFunc) http.HandlerFunc {
@@ -48,6 +56,7 @@ func main() {
 	router.HandleFunc("/pastry", corsAllowAllOrigin(GetPastries)).Methods("GET")
 	router.HandleFunc("/order", corsAllowAllOrigin(GetOrders)).Methods("GET")
 	router.HandleFunc("/order", corsAllowAllOrigin(CreateOrder)).Methods("POST")
+	router.HandleFunc("/schedule", corsAllowAllOrigin(GetBakingSchedules)).Methods("GET")
 
 	http.ListenAndServe(":5555", router)
 }
@@ -96,6 +105,21 @@ func InitDb() *sql.DB {
 
 	InsertOrders(db)
 
+	createBakingScheduleTableStatement := `
+	create table bakingschedule(pastry text not null,
+		quantity real,
+		reserved real,
+		readyDate text,
+		PRIMARY KEY(pastry, readyDate),
+		FOREIGN KEY(pastry) REFERENCES pastry(name));
+	`
+	_, err = db.Exec(createBakingScheduleTableStatement)
+	if err != nil {
+		log.Printf("%q: %s\n", err, createBakingScheduleTableStatement)
+	}
+
+	InsertBakingSchedules(db)
+
 	return db
 }
 
@@ -142,6 +166,33 @@ func InsertOrders(db *sql.DB) {
 
 	for i := 0; i < len(initialOrders); i++ {
 		_, err := stmt.Exec(initialOrders[i].Pastry, initialOrders[i].Customer, initialOrders[i].Quantity, initialOrders[i].PreferedDate.Format(time.RFC3339))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func InsertBakingSchedules(db *sql.DB) {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stmt, err := tx.Prepare(`insert into
+		bakingschedule(pastry, quantity, reserved, readyDate)
+        values(?, ?, ?, ?)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	for i := 0; i < len(initialSchedules); i++ {
+		_, err := stmt.Exec(initialSchedules[i].Pastry, initialSchedules[i].Quantity, initialSchedules[i].Reserved, initialSchedules[i].ReadyDate.Format(time.RFC3339))
 		if err != nil {
 			log.Fatal(err)
 		}
