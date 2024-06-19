@@ -10,7 +10,7 @@ import (
 type Order struct {
 	Pastry       string
 	Customer     string
-	Quantity     int
+	Quantity     float32
 	PreferedDate time.Time
 }
 

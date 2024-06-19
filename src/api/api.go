@@ -69,8 +69,7 @@ func InitDb() *sql.DB {
 	db := ConnectToDb()
 
 	createPastryTableStatement := `
-        create table pastry(id integer not null primary key,
-            name text,
+        create table pastry(name text not null primary key,
             description text,
             price integer,
             unitofmeasure text,
@@ -87,7 +86,7 @@ func InitDb() *sql.DB {
 	create table pastryorder(id integer not null primary key,
 		pastry text,
 		customer text,
-		quantity integer,
+		quantity real,
 		preferedDate text);
 		`
 	_, err = db.Exec(createOrderTableStatement)
