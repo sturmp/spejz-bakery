@@ -31,7 +31,7 @@ var initialSchedules []BakingSchedule = []BakingSchedule{
 	{"kakaós csiga", 12, 5, time.Now()},
 	{"kenyér", 2, 1, time.Now()},
 	{"kenyér", 2, 2, time.Now().AddDate(0, 0, 1)},
-	{"Heti különlegesség", 5, 15, time.Now().AddDate(0, 0, 1)},
+	{"Heti különlegesség", 15, 5, time.Now().AddDate(0, 0, 1)},
 	{"Biscuit", 0.5, 0.5, time.Now().AddDate(0, 0, 1)},
 }
 
