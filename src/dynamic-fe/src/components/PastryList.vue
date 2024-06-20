@@ -4,11 +4,11 @@ import { ref } from 'vue';
 const pastries = ref(null);
 
 const url = "http://localhost:5555/pastry";
-async function fetchPastries() {
+async function fetchPastriesAsync() {
     pastries.value = await (await fetch(url)).json();
 }
 
-fetchPastries();
+fetchPastriesAsync();
 
 </script>
 

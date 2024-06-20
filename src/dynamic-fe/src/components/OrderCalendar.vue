@@ -1,61 +1,97 @@
 <script setup>
+import { ref } from 'vue';
+
+const schedules = ref(null);
+const datesOfWeek = ref(getDaysOfTheWeek());
+const daysOfWeek = [
+    'Hétfő',
+    'Kedd',
+    'Szerda',
+    'Csütörtök',
+    'Péntek',
+    'Szombat',
+    'Vasárnap'
+];
+
+function getDaysOfTheWeek() {
+    var days = new Array();
+    var current = new Date();
+    current.setDate(current.getDate() - current.getDay() + (current.getDay() == 0 ? -6 : 1));
+    for(var i = 0; i < 7; i++) {
+        days.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+    }
+    return days;
+}
+
+const url = "http://localhost:5555/schedule";
+async function fetchBakingSchedulesAsync() {
+    schedules.value = await (await fetch(url)).json();
+}
+
+function anyScheduleForGivenDay(dayOfWeek) {
+    const schedule = schedules.value.find((element) => {
+        return isSameDay(new Date(element.ReadyDate), datesOfWeek.value[dayOfWeek]);
+    })
+    return schedule;
+}
+
+function filterSchedulesForGivenDaysMorning(dayOfWeek) {
+    const filteredSchedules = schedules.value.filter((schedule) => {
+        const scheduleDate = new Date(schedule.ReadyDate);
+        return isSameDay(scheduleDate, datesOfWeek.value[dayOfWeek])
+            && isInTheMoring(scheduleDate);
+    })
+    return filteredSchedules;
+}
+
+function filterSchedulesForGivenDaysAfternoon(dayOfWeek) {
+    const filteredSchedules = schedules.value.filter((schedule) => {
+        const scheduleDate = new Date(schedule.ReadyDate);
+        return isSameDay(scheduleDate, datesOfWeek.value[dayOfWeek])
+            && isInTheAfternoon(scheduleDate);
+    })
+    return filteredSchedules;
+}
+
+function isSameDay(scheduleDate, dateOfWeek) {
+    return scheduleDate.getFullYear() == dateOfWeek.getFullYear()
+        && scheduleDate.getMonth() == dateOfWeek.getMonth()
+        && scheduleDate.getDay() == dateOfWeek.getDay();
+}
+
+function isInTheMoring(scheduleDate) {
+    return scheduleDate.getHours() < 12;
+}
+
+function isInTheAfternoon(scheduleDate) {
+    return scheduleDate.getHours() > 12;
+}
+
+fetchBakingSchedulesAsync()
 </script>
 
 <template>
-    <div id="calendar">
-        <h3>06.17 - 06.23</h3>
-        <div class="row">
-            <div class="day">Hétfő</div>
-            <div class="orders">
-                <div class="order">X</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="day">Kedd</div>
-            <div class="orders">
-                <div class="order">X</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="day">Szerda</div>
-            <div class="double-row">
-                <div class="orders">
-                    <div class="order part-of-day">Délelőtt</div>
-                    <div class="order">Kakaós csiga<br>(2/12)</div>
-                    <div class="order">Kenyér<br>(1/2)</div>
+    <div id="calendar" v-if="schedules != null">
+        <h3>{{ datesOfWeek[0].getMonth()+1 }}.{{ datesOfWeek[0].getDate() }} - {{ datesOfWeek[6].getMonth()+1 }}.{{ datesOfWeek[6].getDate() }}</h3>
+        <div class="row" v-for="(day, index) in daysOfWeek" :key="day">
+            <div class="day">{{ day }}</div>
+            <div class="order-rows">
+                <div class="orders" v-if="anyScheduleForGivenDay(index) == undefined">
+                    <div class="order">X</div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="day">Csütörtök</div>
-            <div class="orders">
-                <div class="order"></div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="day">Péntek</div>
-            <div class="double-row">
-                <div class="orders">
+                <div class="orders" v-if="filterSchedulesForGivenDaysMorning(index).length > 0">
                     <div class="order part-of-day">Délelőtt</div>
-                    <div class="order">Bagel<br>(0/10)</div>
-                    <div class="order">Kenyér<br>(2/2)</div>
+                    <div class="order" v-for="schedule in filterSchedulesForGivenDaysMorning(index)" :key="schedule.Pastry">
+                        {{ schedule.Pastry }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
+                    </div>
                 </div>
-                <div class="orders">
+                <div class="orders" v-if="filterSchedulesForGivenDaysAfternoon(index).length > 0">
                     <div class="order part-of-day">Délután</div>
-                    <div class="order">Biscuit<br>(1kg/1kg)</div>
+                    <div class="order" v-for="schedule in filterSchedulesForGivenDaysAfternoon(index)" :key="schedule.Pastry">
+                        {{ schedule.Pastry }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="day">Szombat</div>
-            <div class="orders">
-                <div class="order">X</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="day">Vasárnap</div>
-            <div class="orders">
-                <div class="order">X</div>
             </div>
         </div>
     </div>
@@ -102,7 +138,7 @@ h3 {
     text-align: center;
 }
 
-.double-row {
+.order-rows {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
