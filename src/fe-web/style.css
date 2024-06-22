@@ -21,13 +21,13 @@ body {
 }
 
 #title {
-    height: 9%;
+    height: 8%;
     text-align: center;
     padding-top: 1em;
 }
 
 #menu {
-    height: 9%;
+    height: 8%;
     margin-bottom: 1em;
     display: flex;
     justify-content: center;
@@ -39,7 +39,7 @@ body {
 }
 
 #tabs {
-    height: 82%;
+    height: 84%;
 }
 
 #item-list {
