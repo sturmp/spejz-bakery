@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/rs/cors"
 )
 
 var pastries []Pastry = []Pastry{
@@ -37,13 +38,6 @@ var initialSchedules []BakingSchedule = []BakingSchedule{
 
 var db *sql.DB
 
-func corsAllowAllOrigin(f http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		f(w, r)
-	}
-}
-
 func main() {
 	if _, err := os.Stat("bakery.db"); err != nil {
 		db = InitDb()
@@ -53,12 +47,13 @@ func main() {
 	defer db.Close()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/pastry", corsAllowAllOrigin(GetPastries)).Methods("GET")
-	router.HandleFunc("/order", corsAllowAllOrigin(GetOrders)).Methods("GET")
-	router.HandleFunc("/order", corsAllowAllOrigin(CreateOrder)).Methods("POST")
-	router.HandleFunc("/schedule", corsAllowAllOrigin(GetBakingSchedules)).Methods("GET")
+	router.HandleFunc("/pastry", GetPastries).Methods("GET")
+	router.HandleFunc("/order", GetOrders).Methods("GET")
+	router.HandleFunc("/order", CreateOrder).Methods("POST")
+	router.HandleFunc("/schedule", GetBakingSchedules).Methods("GET")
 
-	http.ListenAndServe(":5555", router)
+	handler := cors.Default().Handler(router)
+	http.ListenAndServe(":5555", handler)
 }
 
 func ConnectToDb() *sql.DB {
