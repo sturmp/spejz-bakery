@@ -36,6 +36,10 @@ var initialSchedules []BakingSchedule = []BakingSchedule{
 	{"Biscuit", 0.5, 0.5, time.Now().AddDate(0, 0, 1)},
 }
 
+var initialOffDays []time.Time = []time.Time{
+	getFirstDayOfWeek(time.Now()),
+}
+
 var db *sql.DB
 
 func main() {
@@ -51,9 +55,18 @@ func main() {
 	router.HandleFunc("/order", GetOrders).Methods("GET")
 	router.HandleFunc("/order", CreateOrder).Methods("POST")
 	router.HandleFunc("/schedule", GetBakingSchedules).Methods("GET")
+	router.HandleFunc("/dayoff", GetDayOffs).Methods("GET")
 
 	handler := cors.Default().Handler(router)
 	http.ListenAndServe(":5555", handler)
+}
+
+func getFirstDayOfWeek(time time.Time) time.Time {
+	weekDay := time.Weekday()
+	if weekDay == 0 {
+		weekDay = 7
+	}
+	return time.AddDate(0, 0, -int(weekDay)+1)
 }
 
 func ConnectToDb() *sql.DB {
@@ -83,37 +96,43 @@ func InitDb() *sql.DB {
 	if err != nil {
 		log.Printf("%q: %s\n", err, createPastryTableStatement)
 	}
-
 	InsertPastries(db)
 
 	createOrderTableStatement := `
-	create table pastryorder(id integer not null primary key,
-		pastry text,
-		customer text,
-		quantity real,
-		preferedDate text);
-		`
+		create table pastryorder(id integer not null primary key,
+			pastry text,
+			customer text,
+			quantity real,
+			preferedDate text);
+	`
 	_, err = db.Exec(createOrderTableStatement)
 	if err != nil {
 		log.Printf("%q: %s\n", err, createOrderTableStatement)
 	}
-
 	InsertOrders(db)
 
 	createBakingScheduleTableStatement := `
-	create table bakingschedule(pastry text not null,
-		quantity real,
-		reserved real,
-		readyDate text,
-		PRIMARY KEY(pastry, readyDate),
-		FOREIGN KEY(pastry) REFERENCES pastry(name));
+		create table bakingschedule(pastry text not null,
+			quantity real,
+			reserved real,
+			readyDate text,
+			PRIMARY KEY(pastry, readyDate),
+			FOREIGN KEY(pastry) REFERENCES pastry(name));
 	`
 	_, err = db.Exec(createBakingScheduleTableStatement)
 	if err != nil {
 		log.Printf("%q: %s\n", err, createBakingScheduleTableStatement)
 	}
-
 	InsertBakingSchedules(db)
+
+	createDayOffTableStatement := `
+		create table dayoff( day text not null primary key );
+	`
+	_, err = db.Exec(createDayOffTableStatement)
+	if err != nil {
+		log.Printf("%q: %s\n", err, createBakingScheduleTableStatement)
+	}
+	InsertDaysOff(db)
 
 	return db
 }
@@ -188,6 +207,33 @@ func InsertBakingSchedules(db *sql.DB) {
 
 	for i := 0; i < len(initialSchedules); i++ {
 		_, err := stmt.Exec(initialSchedules[i].Pastry, initialSchedules[i].Quantity, initialSchedules[i].Reserved, initialSchedules[i].ReadyDate.Format(time.RFC3339))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func InsertDaysOff(db *sql.DB) {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stmt, err := tx.Prepare(`insert into
+		dayoff(day)
+        values(?)`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	for i := 0; i < len(initialOffDays); i++ {
+		_, err := stmt.Exec(initialOffDays[i].Format(time.RFC3339))
 		if err != nil {
 			log.Fatal(err)
 		}

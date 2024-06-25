@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 const schedules = ref(null);
+const dayOffs = ref(null);
 const datesOfWeek = ref(getDaysOfTheWeek());
 const daysOfWeek = [
     'Hétfő',
@@ -24,9 +25,14 @@ function getDaysOfTheWeek() {
     return days;
 }
 
-const url = "http://localhost:5555/schedule";
+const scheduleUrl = "http://localhost:5555/schedule";
 async function fetchBakingSchedulesAsync() {
-    schedules.value = await (await fetch(url)).json();
+    schedules.value = await (await fetch(scheduleUrl)).json();
+}
+
+const dayOffUrl = "http://localhost:5555/dayoff";
+async function fetchDayOffsAsync() {
+    dayOffs.value = await (await fetch(dayOffUrl)).json();
 }
 
 function anyScheduleForGivenDay(dayOfWeek) {
@@ -57,7 +63,7 @@ function filterSchedulesForGivenDaysAfternoon(dayOfWeek) {
 function isSameDay(scheduleDate, dateOfWeek) {
     return scheduleDate.getFullYear() == dateOfWeek.getFullYear()
         && scheduleDate.getMonth() == dateOfWeek.getMonth()
-        && scheduleDate.getDay() == dateOfWeek.getDay();
+        && scheduleDate.getDate() == dateOfWeek.getDate();
 }
 
 function isInTheMoring(scheduleDate) {
@@ -68,7 +74,16 @@ function isInTheAfternoon(scheduleDate) {
     return scheduleDate.getHours() > 12;
 }
 
+function isDayOff(dayOfWeek) {
+    const foundDayOff = dayOffs.value.find((dayOff) =>{
+        return isSameDay(new Date(dayOff), datesOfWeek.value[dayOfWeek]);
+    })
+
+    return foundDayOff != undefined;
+}
+
 fetchBakingSchedulesAsync()
+fetchDayOffsAsync()
 </script>
 
 <template>
@@ -78,7 +93,7 @@ fetchBakingSchedulesAsync()
             <div class="day">{{ day }}</div>
             <div class="order-rows">
                 <div class="orders" v-if="anyScheduleForGivenDay(index) == undefined">
-                    <div class="order">X</div>
+                    <div class="order">{{ isDayOff(index)? 'X' : '' }}</div>
                 </div>
                 <div class="orders" v-if="filterSchedulesForGivenDaysMorning(index).length > 0">
                     <div class="order part-of-day">Délelőtt</div>
