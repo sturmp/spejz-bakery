@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/internal/configuration"
 	"database/sql"
 	"log"
 	"net/http"
@@ -43,6 +44,8 @@ var initialOffDays []time.Time = []time.Time{
 var db *sql.DB
 
 func main() {
+	configuration.LoadConfiguration()
+
 	if _, err := os.Stat("bakery.db"); err != nil {
 		db = InitDb()
 	} else {
