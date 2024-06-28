@@ -1,11 +1,14 @@
-package main
+package bakingschedule
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 )
+
+var DB *sql.DB
 
 type BakingSchedule struct {
 	Pastry    string
@@ -15,7 +18,7 @@ type BakingSchedule struct {
 }
 
 func GetBakingSchedules(response http.ResponseWriter, request *http.Request) {
-	rows, err := db.Query("select pastry, quantity, reserved, readydate from bakingschedule")
+	rows, err := DB.Query("select pastry, quantity, reserved, readydate from bakingschedule")
 	if err != nil {
 		log.Fatal(err)
 	}

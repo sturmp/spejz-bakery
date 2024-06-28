@@ -1,14 +1,17 @@
-package main
+package dayoff
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 )
 
+var DB *sql.DB
+
 func GetDayOffs(response http.ResponseWriter, request *http.Request) {
-	rows, err := db.Query("select  day from dayoff")
+	rows, err := DB.Query("select  day from dayoff")
 	if err != nil {
 		log.Fatal(err)
 	}

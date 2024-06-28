@@ -1,10 +1,13 @@
-package main
+package pastry
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 )
+
+var DB *sql.DB
 
 type Pastry struct {
 	Name             string
@@ -15,7 +18,7 @@ type Pastry struct {
 }
 
 func GetPastries(response http.ResponseWriter, request *http.Request) {
-	rows, err := db.Query("select name, description, price, unitofmeasure, quantityperpiece from pastry")
+	rows, err := DB.Query("select name, description, price, unitofmeasure, quantityperpiece from pastry")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,7 +1,8 @@
-package main
+package order
 
 import (
 	"api/internal/configuration"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +12,8 @@ import (
 	"github.com/wneessen/go-mail"
 )
 
+var DB *sql.DB
+
 type Order struct {
 	Pastry       string
 	Customer     string
@@ -19,7 +22,7 @@ type Order struct {
 }
 
 func GetOrders(response http.ResponseWriter, request *http.Request) {
-	rows, err := db.Query("select pastry, customer, quantity, preferedDate from pastryorder")
+	rows, err := DB.Query("select pastry, customer, quantity, preferedDate from pastryorder")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +72,7 @@ func CreateOrder(response http.ResponseWriter, request *http.Request) {
 }
 
 func InsertOrderToDb(order Order) {
-	tx, err := db.Begin()
+	tx, err := DB.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
