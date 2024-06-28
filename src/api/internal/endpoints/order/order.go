@@ -2,6 +2,7 @@ package order
 
 import (
 	"api/internal/configuration"
+	"api/internal/endpoints/bakingschedule"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -15,38 +16,15 @@ import (
 var DB *sql.DB
 
 type Order struct {
-	Pastry       string
-	Customer     string
-	Quantity     float32
-	PreferedDate time.Time
+	Pastry        string
+	Customer      string
+	Quantity      float32
+	PreferedDate  time.Time
+	ScheduledDate time.Time
 }
 
 func GetOrders(response http.ResponseWriter, request *http.Request) {
-	rows, err := DB.Query("select pastry, customer, quantity, preferedDate from pastryorder")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	orders := []Order{}
-	for rows.Next() {
-		var order Order
-		var preferedDateText string
-		err = rows.Scan(&order.Pastry, &order.Customer, &order.Quantity, &preferedDateText)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if preferedDate, err := time.Parse(time.RFC3339, preferedDateText); err == nil {
-			order.PreferedDate = preferedDate
-		} else {
-			log.Println(err)
-		}
-		orders = append(orders, order)
-	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
+	orders := fetchOrdersFromDB()
 
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
@@ -62,6 +40,14 @@ func CreateOrder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	schedules := bakingschedule.FetchSchedulesFromDB()
+	for _, schedule := range schedules {
+		if IsOrderFitInSchedule(order, schedule) {
+			order.ScheduledDate = order.PreferedDate
+			schedule.Reserved += order.Quantity
+			bakingschedule.UpdateScheduleReservedInDB(schedule)
+		}
+	}
 	InsertOrderToDb(order)
 
 	encoder := json.NewEncoder(response)
@@ -71,6 +57,50 @@ func CreateOrder(response http.ResponseWriter, request *http.Request) {
 	go sendEmail(order)
 }
 
+func fetchOrdersFromDB() []Order {
+	rows, err := DB.Query("select pastry, customer, quantity, preferedDate, scheduledDate from pastryorder")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	orders := []Order{}
+	for rows.Next() {
+		var order Order
+		var preferedDateText string
+		var scheduledDateText string
+		err = rows.Scan(&order.Pastry, &order.Customer, &order.Quantity, &preferedDateText, &scheduledDateText)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if preferedDate, err := time.Parse(time.RFC3339, preferedDateText); err == nil {
+			order.PreferedDate = preferedDate
+		} else {
+			log.Println(err)
+		}
+
+		if scheduledDate, err := time.Parse(time.RFC3339, scheduledDateText); err == nil {
+			order.ScheduledDate = scheduledDate
+		} else {
+			order.ScheduledDate = time.Time{}
+		}
+
+		orders = append(orders, order)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return orders
+}
+
+func IsOrderFitInSchedule(order Order, schedule bakingschedule.BakingSchedule) bool {
+	return schedule.Pastry == order.Pastry &&
+		schedule.ReadyDate.UTC() == order.PreferedDate.UTC() &&
+		schedule.Quantity-schedule.Reserved >= order.Quantity
+}
+
 func InsertOrderToDb(order Order) {
 	tx, err := DB.Begin()
 	if err != nil {
@@ -78,14 +108,14 @@ func InsertOrderToDb(order Order) {
 	}
 
 	stmt, err := tx.Prepare(`insert into
-		pastryorder(pastry, customer, quantity, preferedDate)
-        values(?, ?, ?, ?)`)
+		pastryorder(pastry, customer, quantity, preferedDate, scheduledDate)
+        values(?, ?, ?, ?, ?)`)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(order.Pastry, order.Customer, order.Quantity, order.PreferedDate.Format(time.RFC3339))
+	_, err = stmt.Exec(order.Pastry, order.Customer, order.Quantity, order.PreferedDate.Format(time.RFC3339), order.ScheduledDate.Format(time.RFC3339))
 	if err != nil {
 		log.Fatal(err)
 	}

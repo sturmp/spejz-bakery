@@ -18,6 +18,36 @@ type BakingSchedule struct {
 }
 
 func GetBakingSchedules(response http.ResponseWriter, request *http.Request) {
+	bakingschedules := FetchSchedulesFromDB()
+
+	encoder := json.NewEncoder(response)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(bakingschedules)
+}
+
+func UpdateScheduleReservedInDB(schedule BakingSchedule) {
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	stmt, err := tx.Prepare(`update bakingschedule set reserved = ? where pastry = ? and readydate = ?`)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(schedule.Reserved, schedule.Pastry, schedule.ReadyDate.Format(time.RFC3339))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	if err = tx.Commit(); err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func FetchSchedulesFromDB() []BakingSchedule {
 	rows, err := DB.Query("select pastry, quantity, reserved, readydate from bakingschedule")
 	if err != nil {
 		log.Fatal(err)
@@ -43,8 +73,5 @@ func GetBakingSchedules(response http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	encoder := json.NewEncoder(response)
-	encoder.SetIndent("", "  ")
-	encoder.Encode(bakingschedules)
+	return bakingschedules
 }

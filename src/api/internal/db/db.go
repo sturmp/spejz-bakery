@@ -21,9 +21,9 @@ var pastries []pastry.Pastry = []pastry.Pastry{
 }
 
 var initialOrders []order.Order = []order.Order{
-	{"kenyér", "Zizi", 1, time.Now().AddDate(0, 0, 1)},
-	{"kakaós csiga", "Andi", 5, time.Now().AddDate(0, 0, 2)},
-	{"English muffin", "Roland", 14, time.Now().AddDate(0, 0, 2)},
+	{"kenyér", "Zizi", 1, time.Now().AddDate(0, 0, 1), time.Time{}},
+	{"kakaós csiga", "Andi", 5, time.Now().AddDate(0, 0, 2), time.Time{}},
+	{"English muffin", "Roland", 14, time.Now().AddDate(0, 0, 2), time.Time{}},
 }
 
 var initialSchedules []bakingschedule.BakingSchedule = []bakingschedule.BakingSchedule{
@@ -72,7 +72,8 @@ func InitDb() *sql.DB {
 			pastry text,
 			customer text,
 			quantity real,
-			preferedDate text);
+			preferedDate text,
+			scheduledDate text);
 	`
 	_, err = db.Exec(createOrderTableStatement)
 	if err != nil {
@@ -148,15 +149,19 @@ func insertOrders(db *sql.DB) {
 	}
 
 	stmt, err := tx.Prepare(`insert into
-		pastryorder(pastry, customer, quantity, preferedDate)
-        values(?, ?, ?, ?)`)
+		pastryorder(pastry, customer, quantity, preferedDate, scheduledDate)
+        values(?, ?, ?, ?, ?)`)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
 	for i := 0; i < len(initialOrders); i++ {
-		_, err := stmt.Exec(initialOrders[i].Pastry, initialOrders[i].Customer, initialOrders[i].Quantity, initialOrders[i].PreferedDate.Format(time.RFC3339))
+		_, err := stmt.Exec(initialOrders[i].Pastry,
+			initialOrders[i].Customer,
+			initialOrders[i].Quantity,
+			initialOrders[i].PreferedDate.Format(time.RFC3339),
+			formatDateOrDefault(initialOrders[i].ScheduledDate))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -166,6 +171,13 @@ func insertOrders(db *sql.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func formatDateOrDefault(t time.Time) string {
+	if t == (time.Time{}) {
+		return ""
+	}
+	return t.Format(time.RFC3339)
 }
 
 func insertBakingSchedules(db *sql.DB) {

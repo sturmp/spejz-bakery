@@ -9,6 +9,7 @@ import OrderForm from './components/OrderForm.vue'
 const showPastryList = ref(true)
 const showOrderCalendar = ref(false)
 const showOrderForm = ref(false)
+const orderCalendar = ref(0)
 
 function handleSwitchToPastryList() {
   showPastryList.value = true;
@@ -30,6 +31,7 @@ function handleOrderFormCloseButtonClick() {
 
 function handleOrderSubmit() {
   showOrderForm.value = false;
+  orderCalendar.value++;
 }
 </script>
 
@@ -41,7 +43,7 @@ function handleOrderSubmit() {
     </div>
     <div id="content">
       <PastryList v-show="showPastryList" />
-      <OrderCalendar v-show="showOrderCalendar" />
+      <OrderCalendar v-show="showOrderCalendar" :key="orderCalendar"/>
     </div>
     <OrderButton class="order" @order-button-click="handleOrderButtonClick"/>
     <OrderForm class="order-form" v-show="showOrderForm" @close-button-click="handleOrderFormCloseButtonClick" @order-submit="handleOrderSubmit"/>
