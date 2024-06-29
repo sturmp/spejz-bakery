@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 const schedules = ref(null);
 const dayOffs = ref(null);
-const datesOfWeek = ref(getDaysOfTheWeek());
+const datesOfWeek = ref(getDatesOfTheWeek());
 const daysOfWeek = [
     'Hétfő',
     'Kedd',
@@ -14,20 +14,35 @@ const daysOfWeek = [
     'Vasárnap'
 ];
 
-function getDaysOfTheWeek() {
+function getDatesOfTheWeek() {
     var days = new Array();
     var current = new Date();
-    current.setDate(current.getDate() - current.getDay() + (current.getDay() == 0 ? -6 : 1));
+    var dayofWeek = current.getDay();
+    if(dayofWeek == 6 || dayofWeek == 0 || (dayofWeek == 5 && current.getHours() > 12)){
+        switch (dayofWeek) {
+            case 5: current.setDate(current.getDate() + 3); break;
+            case 6: current.setDate(current.getDate() + 2); break;
+            case 0: current.setDate(current.getDate() + 1); break;
+        }
+    } else {
+        current.setDate(current.getDate() - current.getDay() + (current.getDay() == 0 ? -6 : 1));
+    }
+
     for(var i = 0; i < 7; i++) {
         days.push(new Date(current));
         current.setDate(current.getDate() + 1);
     }
+
     return days;
 }
 
 const scheduleUrl = "http://localhost:5555/schedule";
 async function fetchBakingSchedulesAsync() {
     schedules.value = await (await fetch(scheduleUrl)).json();
+    schedules.value = schedules.value.filter(schedule => {
+        return schedule.ReadyDate >= datesOfWeek.value[0]
+            && schedule.ReadyDate <= datesOfWeek.value[6]
+    })
 }
 
 const dayOffUrl = "http://localhost:5555/dayoff";
