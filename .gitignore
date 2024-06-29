@@ -1,5 +1,5 @@
 *.db
-src/api/appconfig.json
+appconfig.json
 
 .vscode/*
 !.vscode/settings.json
