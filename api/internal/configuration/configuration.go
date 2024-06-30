@@ -9,6 +9,9 @@ import (
 const appConfigFileName = "appconfig.json"
 
 type Configuration struct {
+	Auth struct {
+		Token string
+	}
 	Database struct {
 		Path string
 	}

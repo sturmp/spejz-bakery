@@ -7,6 +7,7 @@ import (
 	"api/internal/endpoints/dayoff"
 	"api/internal/endpoints/order"
 	"api/internal/endpoints/pastry"
+	auth "api/internal/middlewares"
 	"database/sql"
 	"net/http"
 	"os"
@@ -41,6 +42,7 @@ func main() {
 	router.HandleFunc("/schedule", bakingschedule.GetBakingSchedules).Methods("GET")
 	router.HandleFunc("/dayoff", dayoff.GetDayOffs).Methods("GET")
 
-	handler := cors.Default().Handler(router)
-	http.ListenAndServe(":5555", handler)
+	corsMiddleware := cors.Default().Handler(router)
+	authMiddleware := auth.NewAuth(corsMiddleware, configuration.AppConfig.Auth.Token)
+	http.ListenAndServe(":5555", authMiddleware)
 }
