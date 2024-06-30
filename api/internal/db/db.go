@@ -1,6 +1,7 @@
 package dbUtil
 
 import (
+	"api/internal/configuration"
 	"api/internal/endpoints/bakingschedule"
 	"api/internal/endpoints/order"
 	"api/internal/endpoints/pastry"
@@ -39,7 +40,7 @@ var initialOffDays []time.Time = []time.Time{
 }
 
 func ConnectToDb() *sql.DB {
-	db, err := sql.Open("sqlite3", "bakery.db")
+	db, err := sql.Open("sqlite3", configuration.AppConfig.Database.Path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +49,7 @@ func ConnectToDb() *sql.DB {
 }
 
 func InitDb() *sql.DB {
-	if _, err := os.Stat("bakery.db"); err == nil {
+	if _, err := os.Stat(configuration.AppConfig.Database.Path); err == nil {
 		return nil
 	}
 

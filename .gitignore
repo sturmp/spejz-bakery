@@ -1,5 +1,4 @@
 *.db
-appconfig.json
 
 .vscode/*
 !.vscode/settings.json

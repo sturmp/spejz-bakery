@@ -21,7 +21,7 @@ var db *sql.DB
 func main() {
 	configuration.LoadConfiguration()
 
-	if _, err := os.Stat("bakery.db"); err != nil {
+	if _, err := os.Stat(configuration.AppConfig.Database.Path); err != nil {
 		db = dbUtil.InitDb()
 	} else {
 		db = dbUtil.ConnectToDb()

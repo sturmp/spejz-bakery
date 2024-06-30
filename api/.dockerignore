@@ -1,0 +1,4 @@
+*.db
+*.exe
+Dockerfile
+.dockerignore

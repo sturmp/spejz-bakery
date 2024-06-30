@@ -1,0 +1,15 @@
+{
+    "Database" : {
+        "Path":"db/bakery.db"
+    },
+    "Email" : {
+        "From": "",
+        "To" : "",
+        "Smtp": {
+            "Host": "",
+            "Port": 587,
+            "User": "",
+            "Pass": ""
+        }
+    }
+}
