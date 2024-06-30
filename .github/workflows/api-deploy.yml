@@ -1,0 +1,40 @@
+name: Api Deploy
+
+on:
+    push:
+      branches:
+        - main
+    pull_request:
+      types: [opened, synchronize, reopened, closed]
+      branches:
+        - main
+
+jobs:
+    deploy:
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+        runs-on: self-hosted
+        name: Build Docker Image and Deploy
+        steps:
+            - uses: actions/checkout@v3
+            
+            - name: Add User Secrets to App Config
+              uses: microsoft/variable-substitution@v1
+              with:
+                files: './api/appconfig.json'
+              env:
+                Database.Path: ${{ secrets.DATABASE_PATH }}
+                Email.From: ${{ secrets.EMAIL_FROM }}
+                Email.To: ${{ secrets.EMAIL_TO }}
+                Email.Smtp.Host: ${{ secrets.EMAIL_SMTP_HOST }}
+                Email.Smtp.Port: ${{ secrets.EMAIL_SMTP_PORT }}
+                Email.Smtp.User: ${{ secrets.EMAIL_SMTP_USER }}
+                Email.Smtp.Pass: ${{ secrets.EMAIL_SMTP_PASS }}
+
+            - name: Build Docker Image
+              run: docker build -t bakery-api:latest ./api
+
+            - name: Remove Previous Version
+              run: docker rm -f bakery-api || true
+
+            - name: Create and Start Container
+              run: docker run --name bakery-api -p 5555:5555 --mount source=spejz-bakery,target=/db -d bakery-api
