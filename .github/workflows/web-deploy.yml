@@ -5,6 +5,7 @@ on:
     push:
       paths: 
         - web/**
+        - .github/workflows/web-deploy.yml
       branches:
         - main
     pull_request:

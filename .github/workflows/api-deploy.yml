@@ -5,6 +5,7 @@ on:
     push:
       paths: 
         - api/**
+        - .github/workflows/api-deploy.yml
       branches:
         - main
     pull_request:
