@@ -36,18 +36,26 @@ function getDatesOfTheWeek() {
     return days;
 }
 
-const scheduleUrl = "http://localhost:5555/schedule";
+const scheduleUrl = `${import.meta.env.VITE_API_URL}/schedule`;
 async function fetchBakingSchedulesAsync() {
-    schedules.value = await (await fetch(scheduleUrl)).json();
+    const requestOptions = {
+        method: 'GET',
+        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
+    };
+    schedules.value = await (await fetch(scheduleUrl, requestOptions)).json();
     schedules.value = schedules.value.filter(schedule => {
         return schedule.ReadyDate >= datesOfWeek.value[0]
             && schedule.ReadyDate <= datesOfWeek.value[6]
     })
 }
 
-const dayOffUrl = "http://localhost:5555/dayoff";
+const dayOffUrl = `${import.meta.env.VITE_API_URL}/dayoff`;
 async function fetchDayOffsAsync() {
-    dayOffs.value = await (await fetch(dayOffUrl)).json();
+    const requestOptions = {
+        method: 'GET',
+        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
+    };
+    dayOffs.value = await (await fetch(dayOffUrl, requestOptions)).json();
 }
 
 function anyScheduleForGivenDay(dayOfWeek) {

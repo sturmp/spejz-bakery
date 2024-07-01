@@ -3,9 +3,13 @@ import { ref } from 'vue';
 
 const pastries = ref(null);
 
-const url = "http://localhost:5555/pastry";
+const url =`${import.meta.env.VITE_API_URL}/pastry`;
 async function fetchPastriesAsync() {
-    pastries.value = await (await fetch(url)).json();
+    const requestOptions = {
+        method: 'GET',
+        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
+    };
+    pastries.value = await (await fetch(url, requestOptions)).json();
 }
 
 fetchPastriesAsync();

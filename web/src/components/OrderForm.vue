@@ -18,7 +18,7 @@ function handleCloseButtonClick() {
     emit('close-button-click');
 }
 
-const postUrl = "http://localhost:5555/order";
+const postUrl = `${import.meta.env.VITE_API_URL}/order`;
 async function handleSubmitClick() {
     var date = new Date(preferedDate.value);
 
@@ -38,7 +38,9 @@ async function handleSubmitClick() {
     }
     const requestOptions = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN
+        },
         body: JSON.stringify(order)
     }
 
@@ -77,9 +79,13 @@ function isInvalidInput(date) {
     return isAnyInputInvalid;
 }
 
-const fetchUrl = "http://localhost:5555/pastry";
+const fetchUrl = `${import.meta.env.VITE_API_URL}/pastry`;
 async function fetchPastriesAsync() {
-    pastries.value = await (await fetch(fetchUrl)).json();
+    const requestOptions = {
+        method: 'GET',
+        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
+    };
+    pastries.value = await (await fetch(fetchUrl, requestOptions)).json();
     selectedPastry.value = pastries.value[0].Name;
 }
 
