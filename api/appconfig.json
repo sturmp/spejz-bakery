@@ -1,4 +1,7 @@
 {
+    "Auth": {
+        "Token": ""
+    },
     "Database" : {
         "Path":"db/bakery.db"
     },
