@@ -42,7 +42,12 @@ func main() {
 	router.HandleFunc("/schedule", bakingschedule.GetBakingSchedules).Methods("GET")
 	router.HandleFunc("/dayoff", dayoff.GetDayOffs).Methods("GET")
 
-	corsMiddleware := cors.Default().Handler(router)
-	authMiddleware := auth.NewAuth(corsMiddleware, configuration.AppConfig.Auth.Token)
-	http.ListenAndServe(":5555", authMiddleware)
+	authMiddleware := auth.NewAuth(router, configuration.AppConfig.Auth.Token)
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodHead, http.MethodGet, http.MethodPost},
+		AllowedHeaders:   []string{"AuthToken"},
+		AllowCredentials: true,
+	}).Handler(authMiddleware)
+	http.ListenAndServe(":5555", corsMiddleware)
 }
