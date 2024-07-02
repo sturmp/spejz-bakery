@@ -44,8 +44,9 @@ async function fetchBakingSchedulesAsync() {
     };
     schedules.value = await (await fetch(scheduleUrl, requestOptions)).json();
     schedules.value = schedules.value.filter(schedule => {
-        return schedule.ReadyDate >= datesOfWeek.value[0]
-            && schedule.ReadyDate <= datesOfWeek.value[6]
+        var scheduleReadyDate = new Date(schedule.ReadyDate)
+        return scheduleReadyDate >= datesOfWeek.value[0]
+            && scheduleReadyDate <= datesOfWeek.value[6]
     })
 }
 
