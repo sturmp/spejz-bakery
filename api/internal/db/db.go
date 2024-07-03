@@ -22,9 +22,9 @@ var pastries []pastry.Pastry = []pastry.Pastry{
 }
 
 var initialOrders []order.Order = []order.Order{
-	{"kenyér", "Zizi", 1, time.Now().AddDate(0, 0, 1), time.Time{}},
-	{"kakaós csiga", "Andi", 5, time.Now().AddDate(0, 0, 2), time.Time{}},
-	{"English muffin", "Roland", 14, time.Now().AddDate(0, 0, 2), time.Time{}},
+	{1, "kenyér", "Zizi", 1, time.Now().AddDate(0, 0, 1), time.Time{}},
+	{2, "kakaós csiga", "Andi", 5, time.Now().AddDate(0, 0, 2), time.Time{}},
+	{3, "English muffin", "Roland", 14, time.Now().AddDate(0, 0, 2), time.Time{}},
 }
 
 var initialSchedules []bakingschedule.BakingSchedule = []bakingschedule.BakingSchedule{
