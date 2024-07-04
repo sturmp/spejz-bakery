@@ -18,6 +18,10 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <style scoped>
+header {
+  margin-bottom: 2em;
+}
+
 nav {
   display: flex;
 }

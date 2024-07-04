@@ -1,8 +1,9 @@
 :root {
   --color-background: #ffffff;
 
-  --color-border: #2C3140;
-  --color-border-hover: #9E876D;
+  --border-color: #2C3140;
+  --border-color-hover: #9E876D;
+  --border-size: 0.15em;
 
   --color-text: #000000;
 }
