@@ -188,3 +188,9 @@ h3 {
 .nav-item-hidden {
     margin: 0.5em;
 }
+
+#announcement {
+    margin-top: 2em;
+    text-align: center;
+    font-size: 2em;
+}
