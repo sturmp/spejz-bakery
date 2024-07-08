@@ -86,6 +86,10 @@ body {
     font-weight: initial;
 }
 
+.disabled {
+    text-decoration: line-through;
+}
+
 .price {
     padding-right: 0.3em;
     display: flex;
