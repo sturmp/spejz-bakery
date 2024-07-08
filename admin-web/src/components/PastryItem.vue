@@ -27,13 +27,16 @@ defineProps({
     border-right: var(--border-size) dotted var(--color-text);
 }
 
-.pastry:first-child {
+.pastry:first-of-type {
     border-top: var(--border-size) dotted var(--color-text);
 }
 
 .pastry-property {
+    display: flex;
     padding: 0.5em 0.5em;
     border-right: var(--border-size) dotted var(--color-text);
+
+    align-items: center;
 }
 
 .pastry-property:last-child {

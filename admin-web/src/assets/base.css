@@ -1,11 +1,15 @@
 :root {
   --color-background: #ffffff;
+  --hover-background-color: #ebebeb;
+  --edit-background-color: #9E876D;
 
   --border-color: #2C3140;
   --border-color-hover: #9E876D;
   --border-size: 0.15em;
+  --controll-border-size: 0.18em;
 
   --color-text: #000000;
+  --color-edit-text: #ffffff;
 }
 
 *,
