@@ -13,6 +13,10 @@
   color: var(--color-text);
 }
 
+.link-active {
+  border: var(--border-size) dotted var(--border-color-hover);
+}
+
 @media (hover: hover) {
   .link:hover {
     border: var(--border-size) dotted var(--border-color-hover);
