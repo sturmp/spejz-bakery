@@ -42,3 +42,44 @@ func GetPastries(response http.ResponseWriter, request *http.Request) {
 	encoder.SetIndent("", "  ")
 	encoder.Encode(pastriesFromDB)
 }
+
+func UpdatePastry(response http.ResponseWriter, request *http.Request) {
+	var pastry Pastry
+	if err := json.NewDecoder(request.Body).Decode(&pastry); err != nil {
+		http.Error(response, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		LogandErrorResponse(err, response)
+		return
+	}
+
+	stmt, err := tx.Prepare("update pastry set description=?, price=?, unitofmeasure=?, quantityperpiece=? where name=?")
+	if err != nil {
+		LogandErrorResponse(err, response)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(pastry.Description, pastry.Price, pastry.UnitOfMeasure, pastry.QuantityPerPiece, pastry.Name)
+	if err != nil {
+		LogandErrorResponse(err, response)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		LogandErrorResponse(err, response)
+		return
+	}
+
+	encoder := json.NewEncoder(response)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(pastry)
+}
+
+func LogandErrorResponse(err error, response http.ResponseWriter) {
+	log.Println(err.Error())
+	http.Error(response, "", http.StatusInternalServerError)
+}

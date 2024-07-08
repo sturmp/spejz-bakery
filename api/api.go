@@ -37,6 +37,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/pastry", pastry.GetPastries).Methods("GET")
+	router.HandleFunc("/pastry", pastry.UpdatePastry).Methods("PUT")
 	router.HandleFunc("/order", order.GetOrders).Methods("GET")
 	router.HandleFunc("/order", order.CreateOrder).Methods("POST")
 	router.HandleFunc("/order/schedule", order.ScheduleOrder).Methods("POST")
@@ -47,7 +48,7 @@ func main() {
 	authMiddleware := auth.NewAuth(router, configuration.AppConfig.Auth.Token)
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{http.MethodHead, http.MethodGet, http.MethodPost},
+		AllowedMethods:   []string{http.MethodHead, http.MethodGet, http.MethodPost, http.MethodPut},
 		AllowedHeaders:   []string{"AuthToken"},
 		AllowCredentials: true,
 	}).Handler(authMiddleware)
