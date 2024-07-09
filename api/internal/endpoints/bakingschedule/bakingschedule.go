@@ -39,6 +39,49 @@ func CreateBakingSchedules(response http.ResponseWriter, request *http.Request) 
 	encoder.Encode(bakingSchedule)
 }
 
+func UpdateBakingSchedule(response http.ResponseWriter, request *http.Request) {
+	var bakingSchedule BakingSchedule
+
+	if err := json.NewDecoder(request.Body).Decode(&bakingSchedule); err != nil {
+		http.Error(response, err.Error(), http.StatusBadRequest)
+	}
+
+	bakingSchedule.ReadyDate = bakingSchedule.ReadyDate.Local()
+
+	tx, err := DB.Begin()
+	if err != nil {
+		logAndErrorResponse(err, response)
+		return
+	}
+
+	stmt, err := tx.Prepare("update bakingschedule set quantity=?, reserved=? where pastry=? and readyDate=?")
+	if err != nil {
+		logAndErrorResponse(err, response)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(bakingSchedule.Quantity, bakingSchedule.Reserved, bakingSchedule.Pastry, bakingSchedule.ReadyDate.Format(time.RFC3339))
+	if err != nil {
+		logAndErrorResponse(err, response)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		logAndErrorResponse(err, response)
+		return
+	}
+
+	encoder := json.NewEncoder(response)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(bakingSchedule)
+}
+
+func logAndErrorResponse(err error, response http.ResponseWriter) {
+	log.Println(err.Error())
+	http.Error(response, "", http.StatusInternalServerError)
+}
+
 func insertScheduleToDb(bakingSchedule BakingSchedule) {
 	tx, err := DB.Begin()
 	if err != nil {

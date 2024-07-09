@@ -44,6 +44,7 @@ func main() {
 	router.HandleFunc("/order/schedule", order.ScheduleOrder).Methods("POST")
 	router.HandleFunc("/schedule", bakingschedule.GetBakingSchedules).Methods("GET")
 	router.HandleFunc("/schedule", bakingschedule.CreateBakingSchedules).Methods("POST")
+	router.HandleFunc("/schedule", bakingschedule.UpdateBakingSchedule).Methods("PUT")
 	router.HandleFunc("/dayoff", dayoff.GetDayOffs).Methods("GET")
 
 	authMiddleware := auth.NewAuth(router, configuration.AppConfig.Auth.Token)
