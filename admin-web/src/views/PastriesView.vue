@@ -34,7 +34,7 @@ fetchPastriesAsync();
 </script>
 
 <template>
-    <div cass="content">
+    <div>
         <template v-for="(pastry, index) in pastries" v-bind:key=index>
             <PastryItem class="row" v-if="editedPastry == null || pastry.Name != editedPastry.Name"
                 @click="editPastry(pastry)"
