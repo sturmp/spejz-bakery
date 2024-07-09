@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/wneessen/go-mail"
 )
 
@@ -93,6 +94,40 @@ func ScheduleOrder(response http.ResponseWriter, request *http.Request) {
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
 	encoder.Encode(order)
+}
+
+func DeleteOrder(response http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	orderId, ok := vars["id"]
+	if !ok {
+		http.Error(response, "Missing Order id!", http.StatusBadRequest)
+		return
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		logandErrorResponse(err, response)
+		return
+	}
+
+	stmt, err := tx.Prepare(`delete from pastryorder where id = ?`)
+	if err != nil {
+		logandErrorResponse(err, response)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(orderId)
+	if err != nil {
+		logandErrorResponse(err, response)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		logandErrorResponse(err, response)
+		return
+	}
 }
 
 func fetchOrdersFromDB() []Order {
@@ -185,6 +220,11 @@ func InsertOrderToDb(order Order) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func logandErrorResponse(err error, response http.ResponseWriter) {
+	log.Println(err.Error())
+	http.Error(response, "", http.StatusInternalServerError)
 }
 
 func sendEmail(order Order) {

@@ -40,6 +40,7 @@ func main() {
 	router.HandleFunc("/pastry", pastry.UpdatePastry).Methods("PUT")
 	router.HandleFunc("/order", order.GetOrders).Methods("GET")
 	router.HandleFunc("/order", order.CreateOrder).Methods("POST")
+	router.HandleFunc("/order/{id}", order.DeleteOrder).Methods("DELETE")
 	router.HandleFunc("/order/schedule", order.ScheduleOrder).Methods("POST")
 	router.HandleFunc("/schedule", bakingschedule.GetBakingSchedules).Methods("GET")
 	router.HandleFunc("/schedule", bakingschedule.CreateBakingSchedules).Methods("POST")
@@ -48,7 +49,7 @@ func main() {
 	authMiddleware := auth.NewAuth(router, configuration.AppConfig.Auth.Token)
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{http.MethodHead, http.MethodGet, http.MethodPost, http.MethodPut},
+		AllowedMethods:   []string{http.MethodHead, http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 		AllowedHeaders:   []string{"AuthToken"},
 		AllowCredentials: true,
 	}).Handler(authMiddleware)
