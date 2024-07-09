@@ -17,13 +17,11 @@ async function fetchPastriesAsync() {
 
 function editPastry(pastry) {
     editedPastry.value = pastry;
-    console.log(pastry.value);
 }
 
 function handleSubmit() {
     fetchPastriesAsync();
     editedPastry.value = null;
-    fetchPastriesAsync();
 }
 
 function handleCancel() {
