@@ -48,7 +48,7 @@ func CreateOrder(response http.ResponseWriter, request *http.Request) {
 
 	schedules := bakingschedule.FetchSchedulesFromDB()
 	for _, schedule := range schedules {
-		if IsOrderFitInSchedule(order, schedule) {
+		if IsOrderFitInSchedule(order, schedule, order.PreferedDate) {
 			order.ScheduledDate = order.PreferedDate
 			schedule.Reserved += order.Quantity
 			bakingschedule.UpdateScheduleReservedInDB(schedule)
@@ -82,7 +82,7 @@ func ScheduleOrder(response http.ResponseWriter, request *http.Request) {
 
 	schedules := bakingschedule.FetchSchedulesFromDB()
 	for _, schedule := range schedules {
-		if IsOrderFitInSchedule(order, schedule) {
+		if IsOrderFitInSchedule(order, schedule, scheduleOrderRequest.ScheduledDate) {
 			order.ScheduledDate = scheduleOrderRequest.ScheduledDate
 			schedule.Reserved += order.Quantity
 			bakingschedule.UpdateScheduleReservedInDB(schedule)
@@ -191,9 +191,9 @@ func updateOrderScheduleDateInDB(order Order) {
 	}
 }
 
-func IsOrderFitInSchedule(order Order, schedule bakingschedule.BakingSchedule) bool {
+func IsOrderFitInSchedule(order Order, schedule bakingschedule.BakingSchedule, scheduleDate time.Time) bool {
 	return schedule.Pastry == order.Pastry &&
-		schedule.ReadyDate.UTC() == order.PreferedDate.UTC() &&
+		schedule.ReadyDate.UTC() == scheduleDate.UTC() &&
 		schedule.Quantity-schedule.Reserved >= order.Quantity
 }
 
