@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import ScheduleItem from "../components/ScheduleItem.vue"
 import ScheduleEditItem from "../components/ScheduleEditItem.vue"
+import ScheduleCreateForm from "../components/ScheduleCreateForm.vue"
 
 const schedules = ref(null);
 const editedSchedule = ref(null)
@@ -19,6 +20,10 @@ function editSchedule(schedule) {
     editedSchedule.value = schedule;
 }
 
+function handleCreate() {
+    fetchSchedulesAsync();
+}
+
 function handleSubmit() {
     fetchSchedulesAsync();
     editedSchedule.value = null;
@@ -32,6 +37,7 @@ fetchSchedulesAsync();
 </script>
 
 <template>
+    <ScheduleCreateForm @schedule-create="handleCreate()"/>
     <div>
         <template v-for="(schedule, index) in schedules" v-bind:key=index>
             <ScheduleItem class="row" v-if="editedSchedule == null || schedule.Pastry != editedSchedule.Pastry || schedule.ReadyDate != editedSchedule.ReadyDate"
