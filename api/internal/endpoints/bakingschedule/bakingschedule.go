@@ -1,6 +1,7 @@
 package bakingschedule
 
 import (
+	"api/internal/utility"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -50,36 +51,31 @@ func UpdateBakingSchedule(response http.ResponseWriter, request *http.Request) {
 
 	tx, err := DB.Begin()
 	if err != nil {
-		logAndErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	stmt, err := tx.Prepare("update bakingschedule set quantity=?, reserved=? where pastry=? and readyDate=?")
 	if err != nil {
-		logAndErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(bakingSchedule.Quantity, bakingSchedule.Reserved, bakingSchedule.Pastry, bakingSchedule.ReadyDate.Format(time.RFC3339))
 	if err != nil {
-		logAndErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		logAndErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
 	encoder.Encode(bakingSchedule)
-}
-
-func logAndErrorResponse(err error, response http.ResponseWriter) {
-	log.Println(err.Error())
-	http.Error(response, "", http.StatusInternalServerError)
 }
 
 func insertScheduleToDb(bakingSchedule BakingSchedule) {

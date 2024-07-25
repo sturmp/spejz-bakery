@@ -3,6 +3,7 @@ package order
 import (
 	"api/internal/configuration"
 	"api/internal/endpoints/bakingschedule"
+	"api/internal/utility"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -106,26 +107,26 @@ func DeleteOrder(response http.ResponseWriter, request *http.Request) {
 
 	tx, err := DB.Begin()
 	if err != nil {
-		logandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	stmt, err := tx.Prepare(`delete from pastryorder where id = ?`)
 	if err != nil {
-		logandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(orderId)
 	if err != nil {
-		logandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		logandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 }
@@ -220,11 +221,6 @@ func InsertOrderToDb(order Order) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func logandErrorResponse(err error, response http.ResponseWriter) {
-	log.Println(err.Error())
-	http.Error(response, "", http.StatusInternalServerError)
 }
 
 func sendEmail(order Order) {

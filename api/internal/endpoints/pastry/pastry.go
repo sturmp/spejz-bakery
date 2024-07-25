@@ -1,6 +1,7 @@
 package pastry
 
 import (
+	"api/internal/utility"
 	"database/sql"
 	"encoding/json"
 	"log"
@@ -52,34 +53,29 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 
 	tx, err := DB.Begin()
 	if err != nil {
-		LogandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	stmt, err := tx.Prepare("update pastry set description=?, price=?, unitofmeasure=?, quantityperpiece=? where name=?")
 	if err != nil {
-		LogandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(pastry.Description, pastry.Price, pastry.UnitOfMeasure, pastry.QuantityPerPiece, pastry.Name)
 	if err != nil {
-		LogandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		LogandErrorResponse(err, response)
+		utility.LogAndErrorResponse(err, response)
 		return
 	}
 
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
 	encoder.Encode(pastry)
-}
-
-func LogandErrorResponse(err error, response http.ResponseWriter) {
-	log.Println(err.Error())
-	http.Error(response, "", http.StatusInternalServerError)
 }
