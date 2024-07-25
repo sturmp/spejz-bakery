@@ -3,6 +3,7 @@ package dbUtil
 import (
 	"api/internal/configuration"
 	"api/internal/endpoints/bakingschedule"
+	"api/internal/endpoints/dayoff"
 	"api/internal/endpoints/order"
 	"api/internal/endpoints/pastry"
 	"database/sql"
@@ -21,23 +22,11 @@ var pastries []pastry.Pastry = []pastry.Pastry{
 	{"Heti különlegesség", "Kísérleti sütések jól sikerült egyedei.", "TBD", "db", ""},
 }
 
-var initialOrders []order.Order = []order.Order{
-	{1, "kenyér", "Zizi", 1, time.Now().AddDate(0, 0, 1), time.Time{}},
-	{2, "kakaós csiga", "Andi", 5, time.Now().AddDate(0, 0, 2), time.Time{}},
-	{3, "English muffin", "Roland", 14, time.Now().AddDate(0, 0, 2), time.Time{}},
-}
+var initialOrders []order.Order = []order.Order{}
 
-var initialSchedules []bakingschedule.BakingSchedule = []bakingschedule.BakingSchedule{
-	{"kakaós csiga", 12, 5, time.Now()},
-	{"kenyér", 2, 1, time.Now()},
-	{"kenyér", 2, 2, time.Now().AddDate(0, 0, 1)},
-	{"Heti különlegesség", 15, 5, time.Now().AddDate(0, 0, 1)},
-	{"Biscuit", 0.5, 0.5, time.Now().AddDate(0, 0, 1)},
-}
+var initialSchedules []bakingschedule.BakingSchedule = []bakingschedule.BakingSchedule{}
 
-var initialOffDays []time.Time = []time.Time{
-	getFirstDayOfWeek(time.Now()),
-}
+var initialDayOffs []dayoff.DayOff = []dayoff.DayOff{}
 
 func ConnectToDb() *sql.DB {
 	db, err := sql.Open("sqlite3", configuration.AppConfig.Database.Path)
@@ -97,7 +86,8 @@ func InitDb() *sql.DB {
 	insertBakingSchedules(db)
 
 	createDayOffTableStatement := `
-		create table dayoff( day text not null primary key );
+		create table dayoff(id integer not null primary key,
+			day text not null );
 	`
 	_, err = db.Exec(createDayOffTableStatement)
 	if err != nil {
@@ -106,14 +96,6 @@ func InitDb() *sql.DB {
 	insertDaysOff(db)
 
 	return db
-}
-
-func getFirstDayOfWeek(time time.Time) time.Time {
-	weekDay := time.Weekday()
-	if weekDay == 0 {
-		weekDay = 7
-	}
-	return time.AddDate(0, 0, -int(weekDay)+1)
 }
 
 func insertPastries(db *sql.DB) {
@@ -222,8 +204,8 @@ func insertDaysOff(db *sql.DB) {
 	}
 	defer stmt.Close()
 
-	for i := 0; i < len(initialOffDays); i++ {
-		_, err := stmt.Exec(initialOffDays[i].Format(time.RFC3339))
+	for i := 0; i < len(initialDayOffs); i++ {
+		_, err := stmt.Exec(initialDayOffs[i].Day.Format(time.RFC3339))
 		if err != nil {
 			log.Fatal(err)
 		}
