@@ -31,4 +31,4 @@ jobs:
               run: docker rm -f bakery-admin-web || true
 
             - name: Create and Start Container
-              run: docker run --name bakery-admin-web -p 5173:80 -d bakery-admin-web:latest
+              run: docker run --name bakery-admin-web -p 5174:80 -d bakery-admin-web:latest
