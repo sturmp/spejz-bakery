@@ -5,7 +5,7 @@ on:
     workflow_dispatch:
     push:
       paths: 
-        - web/**
+        - admin-web/**
         - .github/workflows/admin-web-deploy.yml
       branches:
         - main
