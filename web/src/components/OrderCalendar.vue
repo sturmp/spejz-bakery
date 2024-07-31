@@ -100,7 +100,7 @@ function isInTheAfternoon(scheduleDate) {
 
 function isDayOff(dayOfWeek) {
     const foundDayOff = dayOffs.value.find((dayOff) =>{
-        return isSameDay(new Date(dayOff), datesOfWeek.value[dayOfWeek]);
+        return isSameDay(new Date(dayOff.Day), datesOfWeek.value[dayOfWeek]);
     })
 
     return foundDayOff != undefined;
