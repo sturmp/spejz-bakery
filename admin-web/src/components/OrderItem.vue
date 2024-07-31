@@ -59,7 +59,7 @@ function openSelectScheduleDialog() {
 }
 
 const scheduleOrderUrl =`${import.meta.env.VITE_API_URL}/order/schedule`;
-async function scheduleOrderAsync(orderId, orderScheduledDate) {
+function scheduleOrder(orderId, orderScheduledDate) {
     const orderSchedule = {
         Id: orderId,
         ScheduledDate: orderScheduledDate
@@ -70,10 +70,11 @@ async function scheduleOrderAsync(orderId, orderScheduledDate) {
         headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
         body: JSON.stringify(orderSchedule)
     };
-    await fetch(scheduleOrderUrl, requestOptions);
-
-    emits('order-modified');
-    showSchedules.value = false;
+    fetch(scheduleOrderUrl, requestOptions)
+        .then(() => {
+            emits('order-modified');
+            showSchedules.value = false;
+        });
 }
 
 function cancelOrderSchedule() {
@@ -95,7 +96,7 @@ function cancelOrderSchedule() {
     <div class="schedules" v-if="showSchedules">
         <div class="schedule" v-for="schedule, index in schedules"
             v-bind:key="index"
-            @click="scheduleOrderAsync(id, schedule.ReadyDate)">
+            @click="scheduleOrder(id, schedule.ReadyDate)">
             <div>{{ formatDate(new Date(schedule.ReadyDate)) }}</div>
             <div>{{ "[" + schedule.Reserved + "/" + schedule.Quantity +"]" }}</div>
         </div>

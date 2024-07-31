@@ -8,7 +8,7 @@ const props = defineProps({
     readydate: Date,
 });
 
-const emit = defineEmits(["submit", "cancel"]);
+const emit = defineEmits(["schedule-submit", "schedule-cancel"]);
 
 const schedule = ref({
     pastry: props.pastry,
@@ -28,8 +28,8 @@ async function updateScheduleAsync() {
 }
 
 function handleSubmit() {
-    updateScheduleAsync(schedule);
-    emit('submit');
+    updateScheduleAsync(schedule)
+        .then(() => emit('schedule-submit'));
 }
 
 function formatDate(date) {
@@ -50,7 +50,7 @@ function formatDate(date) {
         <div class="schedule-property">{{formatDate(schedule.readydate)}}</div>
         <div class="controlls-group">
             <div class="controll" @click="handleSubmit()">✓</div>
-            <div class="controll" @click="emit('cancel')">x</div>
+            <div class="controll" @click="emit('schedule-cancel')">x</div>
         </div>
     </div>
 

@@ -25,8 +25,8 @@ function handleCreate() {
 }
 
 function handleSubmit() {
-    fetchSchedulesAsync();
-    editedSchedule.value = null;
+    fetchSchedulesAsync()
+        .then(() => editedSchedule.value = null);
 }
 
 function handleCancel() {
@@ -48,8 +48,8 @@ fetchSchedulesAsync();
                 :readydate="new Date(schedule.ReadyDate)"/>
             <template v-if="editedSchedule != null && schedule.Pastry == editedSchedule.Pastry && schedule.ReadyDate == editedSchedule.ReadyDate">
                 <ScheduleEditItem class="row-edit"
-                    @submit="handleSubmit()"
-                    @cancel="handleCancel()"
+                    @schedule-submit="handleSubmit()"
+                    @schedule-cancel="handleCancel()"
                     :pastry="schedule.Pastry"
                     :quantity="schedule.Quantity"
                     :reserved="schedule.Reserved"

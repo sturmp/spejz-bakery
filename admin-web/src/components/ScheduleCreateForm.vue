@@ -45,8 +45,8 @@ async function createScheduleAsync() {
 }
 
 function handleCreate() {
-    createScheduleAsync(schedule);
-    emit('schedule-create');
+    createScheduleAsync(schedule)
+        .then(() => emit('schedule-create'));
 }
 
 fetchPastriesAsync();
