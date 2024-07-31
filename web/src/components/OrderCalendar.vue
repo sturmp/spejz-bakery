@@ -106,13 +106,25 @@ function isDayOff(dayOfWeek) {
     return foundDayOff != undefined;
 }
 
+function getFormatedDate(date) {
+    return `${addPaddingZero(date.getMonth()+1)}.${addPaddingZero(date.getDate())}`;
+}
+
+function addPaddingZero(number) {
+    if (number < 10) {
+        return `0${number}`;
+    }
+
+    return number;
+}
+
 fetchBakingSchedulesAsync()
 fetchDayOffsAsync()
 </script>
 
 <template>
     <div id="calendar" v-if="schedules != null">
-        <h3>{{ datesOfWeek[0].getMonth()+1 }}.{{ datesOfWeek[0].getDate() }} - {{ datesOfWeek[6].getMonth()+1 }}.{{ datesOfWeek[6].getDate() }}</h3>
+        <h3>{{ `${getFormatedDate(datesOfWeek[0])} - ${getFormatedDate(datesOfWeek[6])}` }}</h3>
         <div class="row" v-for="(day, index) in daysOfWeek" :key="day">
             <div class="day">{{ day }}</div>
             <div class="order-rows">
