@@ -69,7 +69,6 @@ function isInvalidInput(date) {
     }
 
     const today = new Date();
-    today.setDate(today.getDate() + 2);
     today.setHours(date.getHours(), 0, 0, 0);
     if (isNaN(date) || date < today) {
         invalidPreferedDate.value = true;
