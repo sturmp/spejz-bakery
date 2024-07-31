@@ -59,8 +59,8 @@ fetchPastriesAsync();
                 <option v-for="pastry in pastries" :key="pastry.Name">{{ pastry.Name }}</option>
             </select>
         </div>
-        <div class="schedule-property"><input v-model="schedule.quantity" type="number"/></div>
-        <div class="schedule-property"><input v-model="schedule.reserved" type="number"/></div>
+        <div class="schedule-property"><span>Quantity:</span><input v-model="schedule.quantity" type="number"/></div>
+        <div class="schedule-property"><span>Reserved:</span><input v-model="schedule.reserved" type="number"/></div>
         <div class="schedule-property"><input v-model="schedule.readydate" type="date"/></div>
         <div class="schedule-property">
             <select v-model="schedule.partOfDay">
@@ -96,6 +96,10 @@ fetchPastriesAsync();
 
 .schedule-property:nth-child(6) {
     border-right: 0;
+}
+
+.schedule-property span {
+    padding-left: 0.5em;
 }
 
 input {
