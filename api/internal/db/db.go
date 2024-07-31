@@ -17,7 +17,7 @@ var pastries []pastry.Pastry = []pastry.Pastry{
 	{"Foccacia", "Olasz olajos kenyér lángos... Feltét nélkül.", "~440", "db", "~125g"},
 	{"kenyér", "Sima kenyér. Semmi extra.", "600", "db", "750g"},
 	{"English muffin", "Nem, ez nem az édesség. <a href=\"https://www.google.com/search?client=firefox-b-d&q=english+muffin\">Nézz utána!</a>", "150", "db", "65g"},
-	{"Kakaós/Fahéjas csiga", "Kakaós(/fahéjas) és fel van tekerve.", "500", "db", "100g"},
+	{"Kakaós csiga", "Kakaós és fel van tekerve.", "500", "db", "100g"},
 	{"Tortilla", "Mexikói lapos lángos. Kaja origami.", "100", "db", "~20cm"},
 	{"Heti különlegesség", "Bagel. Te a kutyára gondolsz, de az beagle. Ez olyan mint a szalagos fánk csak sós.", "350", "db", "~90g"},
 }
