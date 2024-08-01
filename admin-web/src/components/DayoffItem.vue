@@ -1,29 +1,12 @@
 <script setup>
+import { formatDateWithDayName } from '@/modules/datetime.mjs';
+
 defineProps({
     id: Number,
     dayoff: Date,
 });
 
 const emits = defineEmits(['dayoff-deleted']);
-
-const days = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
-];
-
-function formatDate(date) {
-    const month = date.getMonth() + 1;
-    const monthString = month < 10 ? `0${month}` : month;
-    const day = date.getDate();
-    const dayString = day < 10 ? `0${day}` : day;
-
-    return `${date.getFullYear()}-${monthString}-${dayString} ${days[date.getDay()]}`;
-}
 
 const url =`${import.meta.env.VITE_API_URL}/dayoff/`;
 async function deleteDayoffAsync(id) {
@@ -38,7 +21,7 @@ async function deleteDayoffAsync(id) {
 
 <template>
     <div class="dayoff">
-        <div class="dayoff-property">{{ formatDate(dayoff) }}</div>
+        <div class="dayoff-property">{{ formatDateWithDayName(dayoff) }}</div>
         <div class="dayoff-property controll" @click="deleteDayoffAsync(id)">X</div>
     </div>
 </template>
