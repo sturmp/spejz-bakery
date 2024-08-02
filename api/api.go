@@ -3,12 +3,14 @@ package main
 import (
 	"api/internal/configuration"
 	dbUtil "api/internal/db"
+	"api/internal/db/migration"
 	"api/internal/endpoints/bakingschedule"
 	"api/internal/endpoints/dayoff"
 	"api/internal/endpoints/order"
 	"api/internal/endpoints/pastry"
 	auth "api/internal/middlewares"
 	"database/sql"
+	"log"
 	"net/http"
 	"os"
 
@@ -26,6 +28,9 @@ func main() {
 		db = dbUtil.InitDb()
 	} else {
 		db = dbUtil.ConnectToDb()
+	}
+	if err := migration.RunMigrations("migration", db); err != nil {
+		log.Fatal(err.Error())
 	}
 	defer db.Close()
 
@@ -56,5 +61,7 @@ func main() {
 		AllowedHeaders:   []string{"AuthToken"},
 		AllowCredentials: true,
 	}).Handler(authMiddleware)
+
+	log.Println("Listening on :5555")
 	http.ListenAndServe(":5555", corsMiddleware)
 }
