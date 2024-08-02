@@ -11,6 +11,7 @@ import (
 var DB *sql.DB
 
 type Pastry struct {
+	Id               int
 	Name             string
 	Description      string
 	Price            string
@@ -19,24 +20,24 @@ type Pastry struct {
 }
 
 func GetPastries(response http.ResponseWriter, request *http.Request) {
-	rows, err := DB.Query("select name, description, price, unitofmeasure, quantityperpiece from pastry")
+	rows, err := DB.Query("SELECT id, name, description, price, unitofmeasure, quantityperpiece FROM pastry")
 	if err != nil {
-		log.Fatal(err)
+		utility.LogAndErrorResponse(err, response)
 	}
 	defer rows.Close()
 
 	pastriesFromDB := []Pastry{}
 	for rows.Next() {
 		var pastry Pastry
-		err = rows.Scan(&pastry.Name, &pastry.Description, &pastry.Price, &pastry.UnitOfMeasure, &pastry.QuantityPerPiece)
+		err = rows.Scan(&pastry.Id, &pastry.Name, &pastry.Description, &pastry.Price, &pastry.UnitOfMeasure, &pastry.QuantityPerPiece)
 		if err != nil {
-			log.Fatal(err)
+			utility.LogAndErrorResponse(err, response)
 		}
 		pastriesFromDB = append(pastriesFromDB, pastry)
 	}
 	err = rows.Err()
 	if err != nil {
-		log.Fatal(err)
+		utility.LogAndErrorResponse(err, response)
 	}
 
 	encoder := json.NewEncoder(response)
@@ -57,14 +58,14 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	stmt, err := tx.Prepare("update pastry set description=?, price=?, unitofmeasure=?, quantityperpiece=? where name=?")
+	stmt, err := tx.Prepare("UPDATE pastry SET name=?, description=?, price=?, unitofmeasure=?, quantityperpiece=? WHERE id=?")
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(pastry.Description, pastry.Price, pastry.UnitOfMeasure, pastry.QuantityPerPiece, pastry.Name)
+	_, err = stmt.Exec(pastry.Name, pastry.Description, pastry.Price, pastry.UnitOfMeasure, pastry.QuantityPerPiece, pastry.Id)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
@@ -78,4 +79,13 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
 	encoder.Encode(pastry)
+}
+
+func FetchPastryName(pastryId int) string {
+	var pastryName string
+	row := DB.QueryRow("SELECT name FROM pastry WHERE id=?", pastryId)
+	if err := row.Scan(&pastryName); err != nil {
+		log.Fatal(err)
+	}
+	return pastryName
 }

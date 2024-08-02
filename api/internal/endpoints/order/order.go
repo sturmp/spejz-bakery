@@ -3,6 +3,7 @@ package order
 import (
 	"api/internal/configuration"
 	"api/internal/endpoints/bakingschedule"
+	"api/internal/endpoints/pastry"
 	"api/internal/utility"
 	"database/sql"
 	"encoding/json"
@@ -18,12 +19,22 @@ import (
 var DB *sql.DB
 
 type Order struct {
-	Id            int
-	Pastry        string
+	Id     int
+	Pastry struct {
+		Id   int
+		Name string
+	}
 	Customer      string
 	Quantity      float32
 	PreferedDate  time.Time
 	ScheduledDate time.Time
+}
+
+type CreateOrderRequest struct {
+	PastryId     int
+	Customer     string
+	Quantity     float32
+	PreferedDate time.Time
 }
 
 type ScheduleOrderRequest struct {
@@ -32,7 +43,10 @@ type ScheduleOrderRequest struct {
 }
 
 func GetOrders(response http.ResponseWriter, request *http.Request) {
-	orders := fetchOrdersFromDB()
+	orders, err := fetchOrdersFromDB()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+	}
 
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
@@ -40,23 +54,29 @@ func GetOrders(response http.ResponseWriter, request *http.Request) {
 }
 
 func CreateOrder(response http.ResponseWriter, request *http.Request) {
-	var order Order
+	var order CreateOrderRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&order); err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	schedules := bakingschedule.FetchSchedulesFromDB()
+	schedules, err := bakingschedule.FetchSchedulesFromDB()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+	}
 	for _, schedule := range schedules {
-		if IsOrderFitInSchedule(order, schedule, order.PreferedDate) {
-			order.ScheduledDate = order.PreferedDate
+		if isOrderFitInSchedule(order.PastryId, order.Quantity, schedule, order.PreferedDate) {
 			schedule.Reserved += order.Quantity
-			bakingschedule.UpdateScheduleReservedInDB(schedule)
+			if err := bakingschedule.UpdateScheduleReservedInDB(schedule); err != nil {
+				utility.LogAndErrorResponse(err, response)
+			}
 			break
 		}
 	}
-	InsertOrderToDb(order)
+	if err := insertOrderToDb(order); err != nil {
+		utility.LogAndErrorResponse(err, response)
+	}
 
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
@@ -72,7 +92,10 @@ func ScheduleOrder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	orders := fetchOrdersFromDB()
+	orders, err := fetchOrdersFromDB()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+	}
 	var order Order
 	for i := 0; i < len(orders); i++ {
 		if orders[i].Id == scheduleOrderRequest.Id {
@@ -81,13 +104,20 @@ func ScheduleOrder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	schedules := bakingschedule.FetchSchedulesFromDB()
+	schedules, err := bakingschedule.FetchSchedulesFromDB()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+	}
 	for _, schedule := range schedules {
-		if IsOrderFitInSchedule(order, schedule, scheduleOrderRequest.ScheduledDate) {
+		if isOrderFitInSchedule(order.Pastry.Id, order.Quantity, schedule, scheduleOrderRequest.ScheduledDate) {
 			order.ScheduledDate = scheduleOrderRequest.ScheduledDate
 			schedule.Reserved += order.Quantity
-			bakingschedule.UpdateScheduleReservedInDB(schedule)
-			updateOrderScheduleDateInDB(order)
+			if err := bakingschedule.UpdateScheduleReservedInDB(schedule); err != nil {
+				utility.LogAndErrorResponse(err, response)
+			}
+			if err := updateOrderScheduleDateInDB(order); err != nil {
+				utility.LogAndErrorResponse(err, response)
+			}
 			break
 		}
 	}
@@ -111,7 +141,7 @@ func DeleteOrder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	stmt, err := tx.Prepare(`delete from pastryorder where id = ?`)
+	stmt, err := tx.Prepare(`DELETE from pastryorder WHERE id = ?`)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
@@ -131,10 +161,18 @@ func DeleteOrder(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func fetchOrdersFromDB() []Order {
-	rows, err := DB.Query("select id, pastry, customer, quantity, preferedDate, scheduledDate from pastryorder")
+func fetchOrdersFromDB() ([]Order, error) {
+	rows, err := DB.Query(`SELECT
+			pastryorder.id,
+			pastryorder.pastryid,
+			pastry.name,
+			pastryorder.customer,
+			pastryorder.quantity,
+			pastryorder.preferedDate,
+			pastryorder.scheduledDate FROM pastryorder
+		JOIN pastry ON pastryorder.pastryid = pastry.id`)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -143,9 +181,15 @@ func fetchOrdersFromDB() []Order {
 		var order Order
 		var preferedDateText string
 		var scheduledDateText string
-		err = rows.Scan(&order.Id, &order.Pastry, &order.Customer, &order.Quantity, &preferedDateText, &scheduledDateText)
+		err = rows.Scan(&order.Id,
+			&order.Pastry.Id,
+			&order.Pastry.Name,
+			&order.Customer,
+			&order.Quantity,
+			&preferedDateText,
+			&scheduledDateText)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		if preferedDate, err := time.Parse(time.RFC3339, preferedDateText); err == nil {
@@ -164,67 +208,75 @@ func fetchOrdersFromDB() []Order {
 	}
 	err = rows.Err()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return orders
+	return orders, nil
 }
 
-func updateOrderScheduleDateInDB(order Order) {
+func updateOrderScheduleDateInDB(order Order) error {
 	tx, err := DB.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	stmt, err := tx.Prepare(`update pastryorder set scheduledDate = ? where id = ?`)
+	stmt, err := tx.Prepare(`UPDATE pastryorder SET scheduledDate = ? WHERE id = ?`)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(order.ScheduledDate.Format(time.RFC3339), order.Id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func IsOrderFitInSchedule(order Order, schedule bakingschedule.BakingSchedule, scheduleDate time.Time) bool {
-	return schedule.Pastry == order.Pastry &&
+func isOrderFitInSchedule(pastryId int,
+	quantity float32,
+	schedule bakingschedule.BakingSchedule,
+	scheduleDate time.Time) bool {
+	return schedule.Pastry.Id == pastryId &&
 		schedule.ReadyDate.UTC() == scheduleDate.UTC() &&
-		schedule.Quantity-schedule.Reserved >= order.Quantity
+		schedule.Quantity-schedule.Reserved >= quantity
 }
 
-func InsertOrderToDb(order Order) {
+func insertOrderToDb(order CreateOrderRequest) error {
 	tx, err := DB.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	stmt, err := tx.Prepare(`insert into
-		pastryorder(pastry, customer, quantity, preferedDate, scheduledDate)
-        values(?, ?, ?, ?, ?)`)
+	stmt, err := tx.Prepare(`INSERT INTO
+		pastryorder(pastryid, customer, quantity, preferedDate, scheduledDate)
+        VALUES(?, ?, ?, ?, ?)`)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(order.Pastry, order.Customer, order.Quantity, order.PreferedDate.Format(time.RFC3339), order.ScheduledDate.Format(time.RFC3339))
+	_, err = stmt.Exec(order.PastryId, order.Customer, order.Quantity, order.PreferedDate.Format(time.RFC3339), "")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func sendEmail(order Order) {
+func sendEmail(order CreateOrderRequest) {
 	config := configuration.AppConfig
+	pastryName := pastry.FetchPastryName(order.PastryId)
 
 	email := mail.NewMsg()
 	if err := email.From(config.Email.From); err != nil {
@@ -234,7 +286,7 @@ func sendEmail(order Order) {
 		log.Printf("Failed to set To: %s", err)
 	}
 	email.Subject("New Bakery Order from " + order.Customer)
-	email.SetBodyString(mail.TypeTextPlain, fmt.Sprintf("%s\n%s\n%f\n%s", order.Customer, order.Pastry, order.Quantity, order.PreferedDate.Format("2006-01-02 15:04")))
+	email.SetBodyString(mail.TypeTextPlain, fmt.Sprintf("%s\n%s\n%f\n%s", order.Customer, pastryName, order.Quantity, order.PreferedDate.Format("2006-01-02 15:04")))
 
 	client, err := mail.NewClient(config.Email.Smtp.Host, mail.WithPort(config.Email.Smtp.Port), mail.WithSMTPAuth(mail.SMTPAuthLogin),
 		mail.WithUsername(config.Email.Smtp.User), mail.WithPassword(config.Email.Smtp.Pass))
