@@ -29,7 +29,8 @@ type UpsertBakingScheduleRequest struct {
 }
 
 func GetBakingSchedules(response http.ResponseWriter, request *http.Request) {
-	bakingschedules, err := FetchSchedulesFromDB()
+	languageCode := utility.GetLanguageOrDefault(request)
+	bakingschedules, err := FetchSchedulesFromDB(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -142,14 +143,16 @@ func UpdateScheduleReservedInDB(schedule BakingSchedule) error {
 	return nil
 }
 
-func FetchSchedulesFromDB() ([]BakingSchedule, error) {
+func FetchSchedulesFromDB(languageCode string) ([]BakingSchedule, error) {
 	rows, err := DB.Query(`SELECT
 			bakingschedule.pastryid,
-			pastry.name,
+			pastrytranslation.name,
 			bakingschedule.quantity,
 			bakingschedule.reserved,
 			bakingschedule.readydate FROM bakingschedule
-		JOIN pastry ON bakingschedule.pastryid = pastry.id`)
+		JOIN pastry ON bakingschedule.pastryid = pastry.id
+		JOIN pastrytranslation ON bakingschedule.pastryid = pastrytranslation.pastryid
+			AND pastrytranslation.language = ?`, languageCode)
 	if err != nil {
 		return nil, err
 	}

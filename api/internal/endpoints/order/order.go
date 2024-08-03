@@ -43,7 +43,8 @@ type ScheduleOrderRequest struct {
 }
 
 func GetOrders(response http.ResponseWriter, request *http.Request) {
-	orders, err := fetchOrdersFromDB()
+	languageCode := utility.GetLanguageOrDefault(request)
+	orders, err := fetchOrdersFromDB(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -54,6 +55,7 @@ func GetOrders(response http.ResponseWriter, request *http.Request) {
 }
 
 func CreateOrder(response http.ResponseWriter, request *http.Request) {
+	languageCode := utility.GetLanguageOrDefault(request)
 	var order CreateOrderRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&order); err != nil {
@@ -61,7 +63,7 @@ func CreateOrder(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	schedules, err := bakingschedule.FetchSchedulesFromDB()
+	schedules, err := bakingschedule.FetchSchedulesFromDB(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -89,13 +91,14 @@ func CreateOrder(response http.ResponseWriter, request *http.Request) {
 }
 
 func ScheduleOrder(response http.ResponseWriter, request *http.Request) {
+	languageCode := utility.GetLanguageOrDefault(request)
 	var scheduleOrderRequest ScheduleOrderRequest
 	if err := json.NewDecoder(request.Body).Decode(&scheduleOrderRequest); err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	orders, err := fetchOrdersFromDB()
+	orders, err := fetchOrdersFromDB(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -107,7 +110,7 @@ func ScheduleOrder(response http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	schedules, err := bakingschedule.FetchSchedulesFromDB()
+	schedules, err := bakingschedule.FetchSchedulesFromDB(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -164,16 +167,18 @@ func DeleteOrder(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func fetchOrdersFromDB() ([]Order, error) {
+func fetchOrdersFromDB(languageCode string) ([]Order, error) {
 	rows, err := DB.Query(`SELECT
 			pastryorder.id,
 			pastryorder.pastryid,
-			pastry.name,
+			pastrytranslation.name,
 			pastryorder.customer,
 			pastryorder.quantity,
 			pastryorder.preferedDate,
 			pastryorder.scheduledDate FROM pastryorder
-		JOIN pastry ON pastryorder.pastryid = pastry.id`)
+		JOIN pastry ON pastryorder.pastryid = pastry.id
+		JOIN pastrytranslation ON pastryorder.pastryid = pastrytranslation.pastryid
+			AND pastrytranslation.language = ?`, languageCode)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +288,11 @@ func insertOrderToDb(order CreateOrderRequest, scheduledDate time.Time) error {
 
 func sendEmail(order CreateOrderRequest) {
 	config := configuration.AppConfig
-	pastryName := pastry.FetchPastryName(order.PastryId)
+	pastryName, err := pastry.FetchPastryName(order.PastryId)
+	if err != nil {
+		log.Printf("Failed to send email: %s", err.Error())
+		return
+	}
 
 	email := mail.NewMsg()
 	if err := email.From(config.Email.From); err != nil {

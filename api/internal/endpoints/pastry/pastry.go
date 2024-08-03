@@ -4,7 +4,6 @@ import (
 	"api/internal/utility"
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -20,7 +19,18 @@ type Pastry struct {
 }
 
 func GetPastries(response http.ResponseWriter, request *http.Request) {
-	rows, err := DB.Query("SELECT id, name, description, price, unitofmeasure, quantityperpiece FROM pastry")
+	languageCode := utility.GetLanguageOrDefault(request)
+	rows, err := DB.Query(`SELECT pastry.id,
+		pastrytranslation.name,
+		pastrytranslation.description,
+		pastry.price,
+		unitofmeasuretranslation.name,
+		pastry.quantityperpiece
+		FROM pastry
+			JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
+				AND pastrytranslation.language = ?
+			JOIN unitofmeasuretranslation ON pastry.unitofmeasure = unitofmeasuretranslation.unitofmeasureid
+				AND unitofmeasuretranslation.language = ?`, languageCode, languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -46,6 +56,7 @@ func GetPastries(response http.ResponseWriter, request *http.Request) {
 }
 
 func UpdatePastry(response http.ResponseWriter, request *http.Request) {
+	languageCode := utility.GetLanguageOrDefault(request)
 	var pastry Pastry
 	if err := json.NewDecoder(request.Body).Decode(&pastry); err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
@@ -58,14 +69,20 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	stmt, err := tx.Prepare("UPDATE pastry SET name=?, description=?, price=?, unitofmeasure=?, quantityperpiece=? WHERE id=?")
+	_, err = tx.Exec("UPDATE pastry SET price=?, quantityperpiece=? WHERE id=?",
+		pastry.Price,
+		pastry.QuantityPerPiece,
+		pastry.Id)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
-	defer stmt.Close()
 
-	_, err = stmt.Exec(pastry.Name, pastry.Description, pastry.Price, pastry.UnitOfMeasure, pastry.QuantityPerPiece, pastry.Id)
+	_, err = tx.Exec("UPDATE pastrytranslation SET name=?, description=? WHERE pastryid=? AND language=?",
+		pastry.Name,
+		pastry.Description,
+		pastry.Id,
+		languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
@@ -81,11 +98,15 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 	encoder.Encode(pastry)
 }
 
-func FetchPastryName(pastryId int) string {
+func FetchPastryName(pastryId int) (string, error) {
 	var pastryName string
-	row := DB.QueryRow("SELECT name FROM pastry WHERE id=?", pastryId)
+	row := DB.QueryRow(`SELECT name
+		FROM pastry
+			JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
+				AND pastrytranslation.language = "en"
+		WHERE id=?`, pastryId)
 	if err := row.Scan(&pastryName); err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	return pastryName
+	return pastryName, nil
 }
