@@ -134,13 +134,13 @@ fetchDayOffsAsync()
                 <div class="orders" v-if="filterSchedulesForGivenDaysMorning(index).length > 0">
                     <div class="order part-of-day">Délelőtt</div>
                     <div class="order" v-for="schedule in filterSchedulesForGivenDaysMorning(index)" :key="schedule.Pastry">
-                        {{ schedule.Pastry }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
+                        {{ schedule.Pastry.Name }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
                     </div>
                 </div>
                 <div class="orders" v-if="filterSchedulesForGivenDaysAfternoon(index).length > 0">
                     <div class="order part-of-day">Délután</div>
                     <div class="order" v-for="schedule in filterSchedulesForGivenDaysAfternoon(index)" :key="schedule.Pastry">
-                        {{ schedule.Pastry }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
+                        {{ schedule.Pastry.Name }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
                     </div>
                 </div>
             </div>
