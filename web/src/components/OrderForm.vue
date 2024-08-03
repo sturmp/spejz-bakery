@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 const emit = defineEmits(['close-button-click', 'order-submit']);
 
-var selectedPastry = ref("");
+var selectedPastry = ref();
 var quantity = ref(1);
 var customer = ref("");
 var preferedDate = ref("");
@@ -31,7 +31,7 @@ async function handleSubmitClick() {
     }
 
     const order = {
-        'Pastry': selectedPastry.value,
+        'PastryId': selectedPastry.value,
         'Customer': customer.value,
         'Quantity': quantity.value,
         'PreferedDate': partOfDay.value == "morning"?  new Date(date.setHours(8)) : new Date(date.setHours(16)),
@@ -83,7 +83,7 @@ async function fetchPastriesAsync() {
         headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
     };
     pastries.value = await (await fetch(fetchUrl, requestOptions)).json();
-    selectedPastry.value = pastries.value[0].Name;
+    selectedPastry.value = pastries.value[0].Id;
 }
 
 function setInitialPreferedDate() {
@@ -101,7 +101,7 @@ setInitialPreferedDate();
     <div id="message" v-if="showOrderSentMessage"> Rendelés leadva.<br>Készítsd a pocit. Om nyom nyom...</div>
     <div id="close-button" @click="handleCloseButtonClick()" v-if="!showOrderSentMessage">X</div>
     <select v-model="selectedPastry">
-        <option v-for="pastry in pastries" :key="pastry.Name">{{ pastry.Name }}</option>
+        <option v-for="pastry in pastries" :key="pastry.Id" :value="pastry.Id">{{ pastry.Name }}</option>
     </select>
     <input v-model.number="quantity" type="number" min="0">
     <input v-model="preferedDate" type="date" :class="{ 'validation-error': invalidPreferedDate }">
