@@ -16,4 +16,5 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o /app/api
 FROM alpine
 COPY --from=build /app/api /api
 COPY --from=build /app/appconfig.json /appconfig.json
+COPY --from=build /app/migration /migration
 CMD [ "./api" ]
