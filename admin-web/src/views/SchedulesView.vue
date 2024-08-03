@@ -50,7 +50,8 @@ fetchSchedulesAsync();
                 <ScheduleEditItem class="row-edit"
                     @schedule-submit="handleSubmit()"
                     @schedule-cancel="handleCancel()"
-                    :pastry="schedule.Pastry.Name"
+                    :pastryId="schedule.Pastry.Id"
+                    :pastryName="schedule.Pastry.Name"
                     :quantity="schedule.Quantity"
                     :reserved="schedule.Reserved"
                     :readydate="new Date(schedule.ReadyDate)"/>

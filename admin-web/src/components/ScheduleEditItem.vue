@@ -3,7 +3,8 @@ import { ref } from "vue";
 import { formatDate } from '@/modules/datetime.mjs';
 
 const props = defineProps({
-    pastry: String,
+    pastryId: Number,
+    pastryName: String,
     quantity: Number,
     reserved: Number,
     readydate: Date,
@@ -12,7 +13,7 @@ const props = defineProps({
 const emit = defineEmits(["schedule-submit", "schedule-cancel"]);
 
 const schedule = ref({
-    pastry: props.pastry,
+    pastryId: props.pastryId,
     quantity: props.quantity,
     reserved: props.reserved,
     readydate: props.readydate,
@@ -36,7 +37,7 @@ function handleSubmit() {
 
 <template>
     <div class="schedule-edit">
-        <div class="schedule-property">{{schedule.pastry}}</div>
+        <div class="schedule-property">{{props.pastryName}}</div>
         <div class="schedule-property"><input v-model="schedule.quantity" type="number"/></div>
         <div class="schedule-property"><input v-model="schedule.reserved" type="number"/></div>
         <div class="schedule-property">{{formatDate(schedule.readydate)}}</div>
