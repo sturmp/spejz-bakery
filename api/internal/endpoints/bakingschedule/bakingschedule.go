@@ -62,8 +62,6 @@ func UpdateBakingSchedule(response http.ResponseWriter, request *http.Request) {
 		http.Error(response, err.Error(), http.StatusBadRequest)
 	}
 
-	bakingSchedule.ReadyDate = bakingSchedule.ReadyDate.Local()
-
 	tx, err := DB.Begin()
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
