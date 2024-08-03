@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 const emit = defineEmits(['order-button-click']);
 
 function handleOrderButtonClick() {
@@ -7,7 +10,7 @@ function handleOrderButtonClick() {
 </script>
 
 <template>
-        <div id="order-button" @click="handleOrderButtonClick()">Rendelek</div>
+        <div id="order-button" @click="handleOrderButtonClick()">{{ t('order') }}</div>
 </template>
 
 <style>

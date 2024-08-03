@@ -1,19 +1,22 @@
 <script setup>
 import { ref } from 'vue';
 import { fetchFromApi } from '@/modules/fetch.mjs';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const schedules = ref(null);
 const dayOffs = ref(null);
 const datesOfWeek = ref(getDatesOfTheWeek());
+
 const daysOfWeek = [
-    'Hétfő',
-    'Kedd',
-    'Szerda',
-    'Csütörtök',
-    'Péntek',
-    'Szombat',
-    'Vasárnap'
-];
+        t('monday'),
+        t('tuesday'),
+        t('wednesday'),
+        t('thursday'),
+        t('friday'),
+        t('saturday'),
+        t('sunday')
+    ];
 
 function getDatesOfTheWeek() {
     var days = new Array();
@@ -125,13 +128,13 @@ fetchDayOffsAsync()
                     <div class="order">{{ isDayOff(index)? 'X' : '' }}</div>
                 </div>
                 <div class="orders" v-if="filterSchedulesForGivenDaysMorning(index).length > 0">
-                    <div class="order part-of-day">Délelőtt</div>
+                    <div class="order part-of-day">{{ t('morning') }}</div>
                     <div class="order" v-for="schedule in filterSchedulesForGivenDaysMorning(index)" :key="schedule.Pastry">
                         {{ schedule.Pastry.Name }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
                     </div>
                 </div>
                 <div class="orders" v-if="filterSchedulesForGivenDaysAfternoon(index).length > 0">
-                    <div class="order part-of-day">Délután</div>
+                    <div class="order part-of-day">{{ t('afternoon') }}</div>
                     <div class="order" v-for="schedule in filterSchedulesForGivenDaysAfternoon(index)" :key="schedule.Pastry">
                         {{ schedule.Pastry.Name }}<br>({{ schedule.Reserved }}/{{ schedule.Quantity }})
                     </div>
@@ -169,7 +172,7 @@ h3 {
 }
 
 .day {
-    flex: 0 1 5em;
+    flex: 0 1 5.5em;
 
     font-weight: bold;
     border-left: 0.15em dotted #2C3140;
@@ -208,5 +211,6 @@ h3 {
 .part-of-day {
     writing-mode: vertical-rl;
     flex: 0 1 auto;
+    padding: 0.2em;
 }
 </style>

@@ -1,0 +1,15 @@
+{
+    "title": "Spejz Bakery",
+    "order": "Order",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "name": "Name",
+    "ordersentmessage": "Order sent.<br>Prepare your tummy. Om nyom nyom..."
+}

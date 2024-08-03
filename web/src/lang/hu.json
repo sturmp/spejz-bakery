@@ -1,0 +1,15 @@
+{
+    "title": "Spejz Pékség",
+    "order": "Rendelek",
+    "monday": "Hétfő",
+    "tuesday": "Kedd",
+    "wednesday": "Szerda",
+    "thursday": "Csütörtök",
+    "friday": "Péntek",
+    "saturday": "Szombat",
+    "sunday": "Vasárnap",
+    "morning": "Délelőtt",
+    "afternoon": "Délután",
+    "name": "Név",
+    "ordersentmessage": "Rendelés leadva.<br>Készítsd a pocit. Om nyom nyom..."
+}

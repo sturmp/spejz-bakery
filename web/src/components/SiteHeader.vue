@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const emit = defineEmits(['switch-to-pastrylist', 'switch-to-ordercalendar'])
 
@@ -22,7 +24,7 @@ function handleOrderCalendarClick() {
 
 <template>
     <div id="header">
-        <h1 id="title">Spejz Pékség</h1>
+        <h1 id="title">{{ t('title') }}</h1>
         <div id="menu">
             <div class="menu-item" :class="{active: pastryListActive}" @click="handlePastryListClick()" >
                 <img src="../assets/imgs/sourdough.png">

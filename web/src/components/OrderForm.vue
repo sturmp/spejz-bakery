@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { fetchFromApi } from '@/modules/fetch.mjs';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const emit = defineEmits(['close-button-click', 'order-submit']);
 
@@ -92,7 +94,7 @@ setInitialPreferedDate();
 
 <template>
 <div id="container">
-    <div id="message" v-if="showOrderSentMessage"> Rendelés leadva.<br>Készítsd a pocit. Om nyom nyom...</div>
+    <div id="message" v-if="showOrderSentMessage"><span v-html="t('ordersentmessage')"></span></div>
     <div id="close-button" @click="handleCloseButtonClick()" v-if="!showOrderSentMessage">X</div>
     <select v-model="selectedPastry">
         <option v-for="pastry in pastries" :key="pastry.Id" :value="pastry.Id">{{ pastry.Name }}</option>
@@ -101,11 +103,11 @@ setInitialPreferedDate();
     <input v-model="preferedDate" type="date" :class="{ 'validation-error': invalidPreferedDate }">
     <div id="part-of-day">
         <input type="radio" id="morning" value="morning" v-model="partOfDay" />
-        <label for="morning">Délelőtt</label>
+        <label for="morning">{{ t('morning') }}</label>
         <input type="radio" id="afternoon" value="afternoon" v-model="partOfDay" />
-        <label for="afternoon">Délután</label>
+        <label for="afternoon">{{ t('afternoon') }}</label>
     </div>
-    <input v-model.trim="customer" type="text" placeholder="Név" :class="{ 'validation-error': invalidCustomer }">
+    <input v-model.trim="customer" type="text" :placeholder="t('name')" :class="{ 'validation-error': invalidCustomer }">
     <div id="submitOrderButton" @click="handleSubmitClick()">Om Nyom Nyom</div>
 </div>
 </template>

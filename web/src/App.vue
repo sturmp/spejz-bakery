@@ -5,6 +5,7 @@ import PastryList from './components/PastryList.vue'
 import OrderCalendar from './components/OrderCalendar.vue'
 import OrderButton from './components/OrderButton.vue'
 import OrderForm from './components/OrderForm.vue'
+import LanguageSwitcher from './components/LanguageSwitcher.vue'
 
 const showPastryList = ref(true)
 const showOrderCalendar = ref(false)
@@ -39,6 +40,7 @@ function handleOrderSubmit() {
   <main>
     <div id="obscure" v-show="showOrderForm"></div>
     <div id="header-container">
+      <LanguageSwitcher id="language-switcher"/>
       <SiteHeader @switch-to-pastrylist="handleSwitchToPastryList" @switch-to-ordercalendar="handleSwitchToOrderCalendar" />
     </div>
     <div id="content">
@@ -70,7 +72,15 @@ main {
 }
 
 #header-container {
+  position: relative;
   flex: 0 1 auto;
+}
+
+#language-switcher {
+  position: absolute;
+  right: 0;
+  top: -1em;
+  z-index: 2;
 }
 
 #content {
