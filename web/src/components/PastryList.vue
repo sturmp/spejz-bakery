@@ -1,15 +1,12 @@
 <script setup>
 import { ref } from 'vue';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const pastries = ref(null);
 
 const url =`${import.meta.env.VITE_API_URL}/pastry`;
 async function fetchPastriesAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    pastries.value = await (await fetch(url, requestOptions)).json();
+    pastries.value = await (await fetchFromApi(url)).json();
 }
 
 fetchPastriesAsync();

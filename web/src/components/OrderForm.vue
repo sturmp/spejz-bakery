@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const emit = defineEmits(['close-button-click', 'order-submit']);
 
@@ -38,14 +39,11 @@ async function handleSubmitClick() {
     }
     const requestOptions = {
         method: 'POST',
-        headers: {
-            'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN
-        },
         body: JSON.stringify(order)
     }
 
     try {
-        const response = await fetch(postUrl, requestOptions);
+        const response = await fetchFromApi(postUrl, requestOptions);
         if (response.status == 200) {
             isOrderSuccess.value = true;
         }
@@ -78,11 +76,7 @@ function isInvalidInput(date) {
 
 const fetchUrl = `${import.meta.env.VITE_API_URL}/pastry`;
 async function fetchPastriesAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    pastries.value = await (await fetch(fetchUrl, requestOptions)).json();
+    pastries.value = await (await fetchFromApi(fetchUrl)).json();
     selectedPastry.value = pastries.value[0].Id;
 }
 

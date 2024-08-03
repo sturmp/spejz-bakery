@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const schedules = ref(null);
 const dayOffs = ref(null);
@@ -38,11 +39,7 @@ function getDatesOfTheWeek() {
 
 const scheduleUrl = `${import.meta.env.VITE_API_URL}/schedule`;
 async function fetchBakingSchedulesAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    schedules.value = await (await fetch(scheduleUrl, requestOptions)).json();
+    schedules.value = await (await fetchFromApi(scheduleUrl)).json();
     schedules.value = schedules.value.filter(schedule => {
         var scheduleReadyDate = new Date(schedule.ReadyDate)
         return scheduleReadyDate >= datesOfWeek.value[0]
@@ -52,11 +49,7 @@ async function fetchBakingSchedulesAsync() {
 
 const dayOffUrl = `${import.meta.env.VITE_API_URL}/dayoff`;
 async function fetchDayOffsAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    dayOffs.value = await (await fetch(dayOffUrl, requestOptions)).json();
+    dayOffs.value = await (await fetchFromApi(dayOffUrl)).json();
 }
 
 function anyScheduleForGivenDay(dayOfWeek) {
