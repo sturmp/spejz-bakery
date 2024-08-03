@@ -2,6 +2,7 @@
 import { ref } from "vue";
 
 const props = defineProps({
+    id: Number,
     name: String,
     description: String,
     price: String,
@@ -12,6 +13,7 @@ const props = defineProps({
 const emit = defineEmits(["submit", "cancel"]);
 
 const pastry = ref({
+    id: props.id,
     name: props.name,
     description: props.description,
     price: props.price,
@@ -30,15 +32,15 @@ async function updatePastryAsync() {
 }
 
 function handleSubmit() {
-    updatePastryAsync(pastry);
-    emit('submit');
+    updatePastryAsync(pastry)
+        .then(() => emit('submit'));
 }
 
 </script>
 
 <template>
     <div class="pastry-edit">
-        <div class="pastry-property">{{pastry.name}}</div>
+        <div class="pastry-property"><input v-model.trim="pastry.name" type="text"/></div>
         <div class="pastry-property"><input v-model.trim="pastry.description" type="text"/></div>
         <div class="pastry-property"><input v-model.trim="pastry.price" type="text"/></div>
         <div class="pastry-property"><input v-model.trim="pastry.unitOfMeasure" type="text"/></div>

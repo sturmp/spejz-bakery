@@ -4,7 +4,8 @@ import { formatDate } from '@/modules/datetime.mjs';
 
 const props = defineProps({
     id: Number,
-    pastry: String,
+    pastryId: Number,
+    pastryName: String,
     customer: String,
     quantity: Number,
     prefereddate: Date,
@@ -40,7 +41,7 @@ async function fetchSchedulesAsync() {
     schedules.value = schedules.value.filter(schedule => {
         var scheduleReadyDate = new Date(schedule.ReadyDate)
         return scheduleReadyDate >= new Date()
-            && schedule.Pastry == props.pastry
+            && schedule.Pastry.Id == props.pastryId
             && schedule.Quantity != schedule.Reserved
     })
 }
@@ -76,7 +77,7 @@ function cancelOrderSchedule() {
 
 <template>
     <div class="order">
-        <div class="order-property">{{ pastry }}</div>
+        <div class="order-property">{{ pastryName }}</div>
         <div class="order-property">{{ customer }}</div>
         <div class="order-property">{{ quantity }}</div>
         <div class="order-property">{{ formatDate(prefereddate) }}</div>

@@ -45,6 +45,7 @@ fetchPastriesAsync();
                 <PastryEditItem class="row-edit"
                     @submit="handleSubmit()"
                     @cancel="handleCancel()"
+                    :id="pastry.Id"
                     :name="pastry.Name"
                     :description="pastry.Description"
                     :price="pastry.Price"

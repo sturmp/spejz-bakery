@@ -42,7 +42,7 @@ fetchSchedulesAsync();
         <template v-for="(schedule, index) in schedules" v-bind:key=index>
             <ScheduleItem class="row" v-if="editedSchedule == null || schedule.Pastry != editedSchedule.Pastry || schedule.ReadyDate != editedSchedule.ReadyDate"
                 @click="editSchedule(schedule)"
-                :pastry="schedule.Pastry"
+                :pastry="schedule.Pastry.Name"
                 :quantity="schedule.Quantity"
                 :reserved="schedule.Reserved"
                 :readydate="new Date(schedule.ReadyDate)"/>
@@ -50,7 +50,7 @@ fetchSchedulesAsync();
                 <ScheduleEditItem class="row-edit"
                     @schedule-submit="handleSubmit()"
                     @schedule-cancel="handleCancel()"
-                    :pastry="schedule.Pastry"
+                    :pastry="schedule.Pastry.Name"
                     :quantity="schedule.Quantity"
                     :reserved="schedule.Reserved"
                     :readydate="new Date(schedule.ReadyDate)"/>

@@ -4,7 +4,8 @@ import { ref } from "vue";
 const emit = defineEmits(["schedule-create"]);
 
 const schedule = ref({
-    pastry: "",
+    pastryId: 0,
+    pastryName: "",
     quantity: 1,
     reserved: 1,
     readydate: "",
@@ -20,7 +21,8 @@ async function fetchPastriesAsync() {
         headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
     };
     pastries.value = await (await fetch(urlFetchPastries, requestOptions)).json();
-    schedule.value.pastry = pastries.value[0].Name;
+    schedule.value.pastryId = pastries.value[0].Id;
+    schedule.value.pastryName = pastries.value[0].Name;
 }
 
 const urlCreateSchedule =`${import.meta.env.VITE_API_URL}/schedule`;
@@ -28,7 +30,7 @@ async function createScheduleAsync() {
     const date = new Date(schedule.value.readydate);
 
     const newSchedule = {
-        pastry: schedule.value.pastry,
+        pastryid: schedule.value.pastryId,
         quantity: schedule.value.quantity,
         reserved: schedule.value.reserved,
         readydate: schedule.value.partOfDay == "morning"
@@ -55,8 +57,8 @@ fetchPastriesAsync();
 <template>
     <div class="schedule-create">
         <div class="schedule-property">
-            <select v-model="schedule.pastry">
-                <option v-for="pastry in pastries" :key="pastry.Name">{{ pastry.Name }}</option>
+            <select v-model="schedule.pastryId">
+                <option v-for="pastry in pastries" :key="pastry.Id" :value="pastry.Id">{{ pastry.Name }}</option>
             </select>
         </div>
         <div class="schedule-property"><span>Quantity:</span><input v-model="schedule.quantity" type="number"/></div>
