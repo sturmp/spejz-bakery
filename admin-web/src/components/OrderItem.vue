@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { formatDate } from '@/modules/datetime.mjs';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const props = defineProps({
     id: Number,
@@ -25,19 +26,14 @@ const deleteUrl =`${import.meta.env.VITE_API_URL}/order/`;
 async function deleteOrderAsync(orderId) {
     const requestOptions = {
         method: 'DELETE',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
     };
-    await fetch(deleteUrl + orderId, requestOptions);
-    emits('order-modified');
+    await fetchFromApi(deleteUrl + orderId, requestOptions)
+        .then(() => emits('order-modified'));
 }
 
 const getScheduleUrl = `${import.meta.env.VITE_API_URL}/schedule`;
 async function fetchSchedulesAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    schedules.value = await (await fetch(getScheduleUrl, requestOptions)).json();
+    schedules.value = await (await fetchFromApi(getScheduleUrl)).json();
     schedules.value = schedules.value.filter(schedule => {
         var scheduleReadyDate = new Date(schedule.ReadyDate)
         return scheduleReadyDate >= new Date()
@@ -60,10 +56,9 @@ function scheduleOrder(orderId, orderScheduledDate) {
 
     const requestOptions = {
         method: 'POST',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
         body: JSON.stringify(orderSchedule)
     };
-    fetch(scheduleOrderUrl, requestOptions)
+    fetchFromApi(scheduleOrderUrl, requestOptions)
         .then(() => {
             emits('order-modified');
             showSchedules.value = false;

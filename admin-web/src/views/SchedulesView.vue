@@ -3,17 +3,14 @@ import { ref } from 'vue';
 import ScheduleItem from "../components/ScheduleItem.vue"
 import ScheduleEditItem from "../components/ScheduleEditItem.vue"
 import ScheduleCreateForm from "../components/ScheduleCreateForm.vue"
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const schedules = ref(null);
 const editedSchedule = ref(null)
 
 const url =`${import.meta.env.VITE_API_URL}/schedule`;
 async function fetchSchedulesAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    schedules.value = await (await fetch(url, requestOptions)).json();
+    schedules.value = await (await fetchFromApi(url)).json();
 }
 
 function editSchedule(schedule) {

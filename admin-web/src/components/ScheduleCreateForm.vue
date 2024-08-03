@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const emit = defineEmits(["schedule-create"]);
 
@@ -16,11 +17,7 @@ const pastries = ref(null);
 
 const urlFetchPastries = `${import.meta.env.VITE_API_URL}/pastry`;
 async function fetchPastriesAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    pastries.value = await (await fetch(urlFetchPastries, requestOptions)).json();
+    pastries.value = await (await fetchFromApi(urlFetchPastries)).json();
     schedule.value.pastryId = pastries.value[0].Id;
     schedule.value.pastryName = pastries.value[0].Name;
 }
@@ -40,10 +37,9 @@ async function createScheduleAsync() {
 
     const requestOptions = {
         method: 'POST',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
         body: JSON.stringify(newSchedule)
     };
-    await (await fetch(urlCreateSchedule, requestOptions)).json();
+    await (await fetchFromApi(urlCreateSchedule, requestOptions)).json();
 }
 
 function handleCreate() {

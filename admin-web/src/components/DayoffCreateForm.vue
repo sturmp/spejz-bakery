@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { defineEmits } from 'vue';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const emits = defineEmits(['dayoff-created']);
 
@@ -10,13 +11,13 @@ const url =`${import.meta.env.VITE_API_URL}/dayoff`;
 async function createDayoffAsync() {
     const requestOptions = {
         method: 'POST',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
         body: JSON.stringify(new Date(day.value))
     };
-    await fetch(url, requestOptions);
-
-    day.value = "";
-    emits('dayoff-created');
+    fetchFromApi(url, requestOptions)
+        .then(() => {
+            day.value = "";
+            emits('dayoff-created');
+        });
 }
 </script>
 

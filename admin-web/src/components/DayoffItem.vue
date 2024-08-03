@@ -1,5 +1,6 @@
 <script setup>
 import { formatDateWithDayName } from '@/modules/datetime.mjs';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 defineProps({
     id: Number,
@@ -12,10 +13,9 @@ const url =`${import.meta.env.VITE_API_URL}/dayoff/`;
 async function deleteDayoffAsync(id) {
     const requestOptions = {
         method: 'DELETE',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
     };
-    await fetch(url + id, requestOptions);
-    emits('dayoff-deleted');
+    fetchFromApi(url + id, requestOptions)
+        .then(() => emits('dayoff-deleted'));
 }
 </script>
 

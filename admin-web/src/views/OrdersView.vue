@@ -1,16 +1,13 @@
 <script setup>
 import { ref } from 'vue';
 import OrderItem from '../components/OrderItem.vue';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const orders = ref(null);
 
 const url =`${import.meta.env.VITE_API_URL}/order`;
 async function fetchOrdersAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    orders.value = await (await fetch(url, requestOptions)).json();
+    orders.value = await (await fetchFromApi(url)).json();
 }
 
 function handleOrderModified() {

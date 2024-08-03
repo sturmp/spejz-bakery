@@ -2,16 +2,13 @@
 import { ref } from 'vue';
 import DayoffItem from "../components/DayoffItem.vue"
 import DayoffCreateForm from "../components/DayoffCreateForm.vue"
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const dayoffs = ref(null);
 
 const url =`${import.meta.env.VITE_API_URL}/dayoff`;
 async function fetchDayoffsAsync() {
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN }
-    };
-    dayoffs.value = await (await fetch(url, requestOptions)).json();
+    dayoffs.value = await (await fetchFromApi(url)).json();
 }
 
 function handleDayoffCreated() {

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const props = defineProps({
     id: Number,
@@ -25,10 +26,9 @@ const url =`${import.meta.env.VITE_API_URL}/pastry`;
 async function updatePastryAsync() {
     const requestOptions = {
         method: 'PUT',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
         body: JSON.stringify(pastry.value)
     };
-    await (await fetch(url, requestOptions)).json();
+    await (await fetchFromApi(url, requestOptions)).json();
 }
 
 function handleSubmit() {

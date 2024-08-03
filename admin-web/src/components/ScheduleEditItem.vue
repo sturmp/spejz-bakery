@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { formatDate } from '@/modules/datetime.mjs';
+import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const props = defineProps({
     pastryId: Number,
@@ -23,10 +24,9 @@ const url =`${import.meta.env.VITE_API_URL}/schedule`;
 async function updateScheduleAsync() {
     const requestOptions = {
         method: 'PUT',
-        headers: { 'AuthToken': import.meta.env.VITE_API_AUTH_TOKEN },
         body: JSON.stringify(schedule.value)
     };
-    await (await fetch(url, requestOptions)).json();
+    await (await fetchFromApi(url, requestOptions)).json();
 }
 
 function handleSubmit() {
