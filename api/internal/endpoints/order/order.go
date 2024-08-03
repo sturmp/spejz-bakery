@@ -65,16 +65,19 @@ func CreateOrder(response http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
+	var scheduledDate time.Time
 	for _, schedule := range schedules {
 		if isOrderFitInSchedule(order.PastryId, order.Quantity, schedule, order.PreferedDate) {
 			schedule.Reserved += order.Quantity
+			scheduledDate = schedule.ReadyDate
 			if err := bakingschedule.UpdateScheduleReservedInDB(schedule); err != nil {
 				utility.LogAndErrorResponse(err, response)
 			}
 			break
 		}
 	}
-	if err := insertOrderToDb(order); err != nil {
+
+	if err := insertOrderToDb(order, scheduledDate); err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
 
@@ -247,7 +250,7 @@ func isOrderFitInSchedule(pastryId int,
 		schedule.Quantity-schedule.Reserved >= quantity
 }
 
-func insertOrderToDb(order CreateOrderRequest) error {
+func insertOrderToDb(order CreateOrderRequest, scheduledDate time.Time) error {
 	tx, err := DB.Begin()
 	if err != nil {
 		return err
@@ -261,7 +264,11 @@ func insertOrderToDb(order CreateOrderRequest) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(order.PastryId, order.Customer, order.Quantity, order.PreferedDate.Format(time.RFC3339), "")
+	scheduledDateString := ""
+	if !scheduledDate.IsZero() {
+		scheduledDateString = scheduledDate.Format((time.RFC3339))
+	}
+	_, err = stmt.Exec(order.PastryId, order.Customer, order.Quantity, order.PreferedDate.Format(time.RFC3339), scheduledDateString)
 	if err != nil {
 		return err
 	}
