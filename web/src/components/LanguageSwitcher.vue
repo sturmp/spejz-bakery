@@ -19,7 +19,7 @@ function initLanguage() {
         return
     }
 
-    locale.value = 'en'
+    locale.value = 'hu'
     localStorage.setItem('lang', locale.value)
 }
 
