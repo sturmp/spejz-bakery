@@ -12,7 +12,7 @@ export function fetchFromApi(url, options) {
     options.headers["Accept-Language"] = lang
   }
   if (!options.headers["AuthToken"]) {
-    options.headers["AuthToken"] = import.meta.env.VITE_API_AUTH_TOKEN
+    options.headers["AuthToken"] = import.meta.env.VITE_API_AUTH_ADMINTOKEN
   }
   return fetch(url, options);
 }
