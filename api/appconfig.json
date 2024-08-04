@@ -1,6 +1,13 @@
 {
     "Auth": {
-        "Token": ""
+        "Token": "",
+        "AdminToken": "",
+        "NonAdminEndpoints": [
+            {"Path": "/pastry", "Method":"GET"},
+            {"Path": "/order", "Method":"POST"},
+            {"Path": "/schedule", "Method":"GET"},
+            {"Path": "/dayoff", "Method":"GET"}
+        ]
     },
     "Database" : {
         "Path":"db/bakery.db"

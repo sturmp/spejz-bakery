@@ -54,7 +54,10 @@ func main() {
 	router.HandleFunc("/dayoff", dayoff.CreateDayOff).Methods("POST")
 	router.HandleFunc("/dayoff/{id}", dayoff.DeleteDayOff).Methods("DELETE")
 
-	authMiddleware := auth.NewAuth(router, configuration.AppConfig.Auth.Token)
+	authMiddleware := auth.NewAuth(router,
+		configuration.AppConfig.Auth.Token,
+		configuration.AppConfig.Auth.AdminToken,
+		configuration.AppConfig.Auth.NonAdminEndpoints)
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{http.MethodHead, http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},

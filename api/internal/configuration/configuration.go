@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	auth "api/internal/middlewares"
 	"encoding/json"
 	"log"
 	"os"
@@ -10,7 +11,9 @@ const appConfigFileName = "appconfig.json"
 
 type Configuration struct {
 	Auth struct {
-		Token string
+		Token             string
+		AdminToken        string
+		NonAdminEndpoints []auth.Endpoint
 	}
 	Database struct {
 		Path string

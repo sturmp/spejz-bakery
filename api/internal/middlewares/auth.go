@@ -5,8 +5,15 @@ import (
 )
 
 type Auth struct {
-	handler http.Handler
-	Token   string
+	handler           http.Handler
+	Token             string
+	AdminToken        string
+	NonAdminEndpoints []Endpoint
+}
+
+type Endpoint struct {
+	Path   string
+	Method string
 }
 
 func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +23,10 @@ func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if token != auth.Token {
+	if isAdminEndpoint(auth, r.URL.Path, r.Method) && token != auth.AdminToken {
+		http.Error(w, "invalid auth token", http.StatusUnauthorized)
+		return
+	} else if token != auth.Token && token != auth.AdminToken {
 		http.Error(w, "invalid auth token", http.StatusUnauthorized)
 		return
 	}
@@ -24,6 +34,20 @@ func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	auth.handler.ServeHTTP(w, r)
 }
 
-func NewAuth(handlerToWrap http.Handler, token string) *Auth {
-	return &Auth{handlerToWrap, token}
+func NewAuth(handlerToWrap http.Handler,
+	token string,
+	adminToken string,
+	notAdminEndpoints []Endpoint) *Auth {
+	return &Auth{handlerToWrap, token, adminToken, notAdminEndpoints}
+}
+
+func isAdminEndpoint(auth *Auth, path string, method string) bool {
+	for i := 0; i < len(auth.NonAdminEndpoints); i++ {
+		if auth.NonAdminEndpoints[i].Path == path &&
+			auth.NonAdminEndpoints[i].Method == method {
+			return false
+		}
+	}
+
+	return true
 }
