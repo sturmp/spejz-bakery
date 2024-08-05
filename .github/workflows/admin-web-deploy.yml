@@ -25,7 +25,7 @@ jobs:
             - uses: actions/checkout@v3
 
             - name: Build Docker Image
-              run:  docker build --build-arg VITE_API_URL=${{vars.API_URL}} --build-arg VITE_API_AUTH_TOKEN=${{secrets.AUTH_TOKEN}} -t bakery-admin-web ./admin-web
+              run:  docker build --build-arg VITE_API_URL=${{vars.API_URL}} --build-arg VITE_API_AUTH_ADMINTOKEN=${{secrets.AUTH_ADMINTOKEN}} -t bakery-admin-web ./admin-web
 
             - name: Remove Previous Version
               run: docker rm -f bakery-admin-web || true
