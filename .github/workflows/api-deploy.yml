@@ -30,6 +30,7 @@ jobs:
                 files: './api/appconfig.json'
               env:
                 Auth.Token: ${{secrets.AUTH_TOKEN}}
+                Auth.AdminToken: ${{secrets.AUTH_ADMINTOKEN}}
                 Database.Path: ${{ secrets.DATABASE_PATH }}
                 Email.From: ${{ secrets.EMAIL_FROM }}
                 Email.To: ${{ secrets.EMAIL_TO }}
