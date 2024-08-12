@@ -108,7 +108,6 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 }
 
 func CreatePastry(response http.ResponseWriter, request *http.Request) {
-	languageCode := utility.GetLanguageOrDefault(request)
 	var pastry CreatePastryRequest
 	if err := json.NewDecoder(request.Body).Decode(&pastry); err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
@@ -128,7 +127,7 @@ func CreatePastry(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = insertPastryLanguages(tx, languageCode, pastry, pastryId)
+	err = insertPastryLanguages(tx, pastry, pastryId)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
@@ -171,7 +170,7 @@ func insertPastry(tx *sql.Tx, pastry CreatePastryRequest) (pastryId int, err err
 	return pastryId, nil
 }
 
-func insertPastryLanguages(tx *sql.Tx, languageCode string, pastry CreatePastryRequest, pastryId int) error {
+func insertPastryLanguages(tx *sql.Tx, pastry CreatePastryRequest, pastryId int) error {
 	rows, err := tx.Query("SELECT DISTINCT language FROM pastrytranslation")
 	if err != nil {
 		return err
@@ -183,20 +182,14 @@ func insertPastryLanguages(tx *sql.Tx, languageCode string, pastry CreatePastryR
 		if err := rows.Scan(&language); err != nil {
 			return err
 		}
-		name := ""
-		description := ""
-		if language == languageCode {
-			name = pastry.Name
-			description = pastry.Description
-		}
 
 		_, err = tx.Exec(`INSERT INTO
 			pastrytranslation(language, pastryid, name, description)
 			VALUES(?, ?, ?, ?)`,
 			language,
 			pastryId,
-			name,
-			description)
+			pastry.Name,
+			pastry.Description)
 		if err != nil {
 			return err
 		}
