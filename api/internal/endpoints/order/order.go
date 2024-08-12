@@ -146,6 +146,7 @@ func DeleteOrder(response http.ResponseWriter, request *http.Request) {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`DELETE from pastryorder WHERE id = ?`)
 	if err != nil {
@@ -226,6 +227,7 @@ func updateOrderScheduleDateInDB(order Order) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`UPDATE pastryorder SET scheduledDate = ? WHERE id = ?`)
 	if err != nil {
@@ -260,6 +262,7 @@ func insertOrderToDb(order CreateOrderRequest, scheduledDate time.Time) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`INSERT INTO
 		pastryorder(pastryid, customer, quantity, preferedDate, scheduledDate)

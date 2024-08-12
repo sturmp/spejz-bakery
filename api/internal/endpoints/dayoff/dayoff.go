@@ -65,6 +65,7 @@ func DeleteDayOff(response http.ResponseWriter, request *http.Request) {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`delete from dayoff where id = ?`)
 	if err != nil {
@@ -104,6 +105,7 @@ func CreateDayOff(response http.ResponseWriter, request *http.Request) {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`insert into dayoff(day) values(?);`)
 	if err != nil {

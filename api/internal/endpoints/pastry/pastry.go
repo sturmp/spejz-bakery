@@ -76,6 +76,7 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
+	defer tx.Rollback()
 
 	_, err = tx.Exec("UPDATE pastry SET price=?, quantityperpiece=? WHERE id=?",
 		pastry.Price,

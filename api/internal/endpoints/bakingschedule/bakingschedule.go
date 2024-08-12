@@ -68,6 +68,7 @@ func UpdateBakingSchedule(response http.ResponseWriter, request *http.Request) {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("UPDATE bakingschedule SET quantity=?, reserved=? WHERE pastryid=? AND readyDate=?")
 	if err != nil {
@@ -97,6 +98,7 @@ func insertScheduleToDb(bakingSchedule UpsertBakingScheduleRequest) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`INSERT INTO
 		bakingschedule(pastryid, quantity, reserved, readyDate)
@@ -124,6 +126,7 @@ func UpdateScheduleReservedInDB(schedule BakingSchedule) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`UPDATE bakingschedule SET reserved = ? WHERE pastryid = ? AND readydate = ?`)
 	if err != nil {
