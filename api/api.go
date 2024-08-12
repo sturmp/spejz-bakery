@@ -8,6 +8,7 @@ import (
 	"api/internal/endpoints/dayoff"
 	"api/internal/endpoints/order"
 	"api/internal/endpoints/pastry"
+	"api/internal/endpoints/unitofmeasure"
 	auth "api/internal/middlewares"
 	"database/sql"
 	"log"
@@ -38,7 +39,7 @@ func main() {
 	order.DB = db
 	bakingschedule.DB = db
 	dayoff.DB = db
-	dayoff.DB = db
+	unitofmeasure.DB = db
 
 	router := mux.NewRouter()
 	router.HandleFunc("/pastry", pastry.GetPastries).Methods("GET")
@@ -54,6 +55,7 @@ func main() {
 	router.HandleFunc("/dayoff", dayoff.GetDayOffs).Methods("GET")
 	router.HandleFunc("/dayoff", dayoff.CreateDayOff).Methods("POST")
 	router.HandleFunc("/dayoff/{id}", dayoff.DeleteDayOff).Methods("DELETE")
+	router.HandleFunc("/unitofmeasure", unitofmeasure.GetUnitOfMeasures).Methods("GET")
 
 	authMiddleware := auth.NewAuth(router,
 		configuration.AppConfig.Auth.Token,
