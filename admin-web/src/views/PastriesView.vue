@@ -4,6 +4,7 @@ import PastryItem from "../components/PastryItem.vue"
 import PastryEditItem from "../components/PastryEditItem.vue"
 import { fetchFromApi } from '@/modules/fetch.mjs';
 import router from '@/router';
+import PastryCreateForm from '@/components/PastryCreateForm.vue';
 
 const pastries = ref(null);
 const editedPastry = ref(null);
@@ -45,11 +46,16 @@ function handleCancel() {
     editedPastry.value = null;
 }
 
+function handleCreate() {
+    fetchPastriesAsync();
+}
+
 fetchPastriesAsync();
 initLanguage();
 </script>
 
 <template>
+    <PastryCreateForm @pastry-create="handleCreate()" />
     <div id="container">
         <button @click="handleLanguageSwitch()">{{ language }}</button>
         <template v-for="(pastry, index) in pastries" v-bind:key=index>
