@@ -18,6 +18,14 @@ type Pastry struct {
 	QuantityPerPiece string
 }
 
+type CreatePastryRequest struct {
+	Name             string
+	Description      string
+	Price            string
+	UnitOfMeasure    int
+	QuantityPerPiece string
+}
+
 func GetPastries(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)
 	rows, err := DB.Query(`SELECT pastry.id,
@@ -98,6 +106,43 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 	encoder.Encode(pastry)
 }
 
+func CreatePastry(response http.ResponseWriter, request *http.Request) {
+	languageCode := utility.GetLanguageOrDefault(request)
+	var pastry CreatePastryRequest
+	if err := json.NewDecoder(request.Body).Decode(&pastry); err != nil {
+		http.Error(response, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+	defer tx.Rollback()
+
+	pastryId, err := insertPastry(tx, pastry)
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+
+	err = insertPastryLanguages(tx, languageCode, pastry, pastryId)
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+
+	encoder := json.NewEncoder(response)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(pastry)
+}
+
 func FetchPastryName(pastryId int) (string, error) {
 	var pastryName string
 	row := DB.QueryRow(`SELECT name
@@ -109,4 +154,51 @@ func FetchPastryName(pastryId int) (string, error) {
 		return "", err
 	}
 	return pastryName, nil
+}
+
+func insertPastry(tx *sql.Tx, pastry CreatePastryRequest) (pastryId int, err error) {
+	err = tx.QueryRow(`INSERT INTO
+		pastry(price, quantityperpiece, unitofmeasure)
+		VALUES(?, ?, ?)
+		RETURNING id`,
+		pastry.Price,
+		pastry.QuantityPerPiece,
+		pastry.UnitOfMeasure).Scan(&pastryId)
+	if err != nil {
+		return 0, err
+	}
+	return pastryId, nil
+}
+
+func insertPastryLanguages(tx *sql.Tx, languageCode string, pastry CreatePastryRequest, pastryId int) error {
+	rows, err := tx.Query("SELECT DISTINCT language FROM pastrytranslation")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var language string
+		if err := rows.Scan(&language); err != nil {
+			return err
+		}
+		name := ""
+		description := ""
+		if language == languageCode {
+			name = pastry.Name
+			description = pastry.Description
+		}
+
+		_, err = tx.Exec(`INSERT INTO
+			pastrytranslation(language, pastryid, name, description)
+			VALUES(?, ?, ?, ?)`,
+			language,
+			pastryId,
+			name,
+			description)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

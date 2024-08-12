@@ -43,6 +43,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/pastry", pastry.GetPastries).Methods("GET")
 	router.HandleFunc("/pastry", pastry.UpdatePastry).Methods("PUT")
+	router.HandleFunc("/pastry", pastry.CreatePastry).Methods("POST")
 	router.HandleFunc("/order", order.GetOrders).Methods("GET")
 	router.HandleFunc("/order", order.CreateOrder).Methods("POST")
 	router.HandleFunc("/order/{id}", order.DeleteOrder).Methods("DELETE")
