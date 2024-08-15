@@ -11,6 +11,7 @@ const props = defineProps({
     quantity: Number,
     prefereddate: Date,
     scheduleddate: Date,
+    completed: Boolean,
 })
 
 const emits = defineEmits(['order-modified']);
@@ -20,6 +21,15 @@ const showSchedules = ref(false);
 
 function isOrderScheduled(date) {
     return date.getFullYear() != 1;
+}
+
+const completeUrl =`${import.meta.env.VITE_API_URL}/order/complete/`;
+async function completeOrderAsync(orderId) {
+    const requestOptions = {
+        method: 'PUT',
+    };
+    await fetchFromApi(completeUrl + orderId, requestOptions)
+        .then(() => emits('order-modified'));
 }
 
 const deleteUrl =`${import.meta.env.VITE_API_URL}/order/`;
@@ -71,13 +81,14 @@ function cancelOrderSchedule() {
 </script>
 
 <template>
-    <div class="order">
+    <div class="order" :class="{completed: completed}">
         <div class="order-property">{{ pastryName }}</div>
         <div class="order-property">{{ customer }}</div>
         <div class="order-property">{{ quantity }}</div>
         <div class="order-property">{{ formatDate(prefereddate) }}</div>
         <div class="order-property" v-if="isOrderScheduled(scheduleddate)">{{ formatDate(scheduleddate) }}</div>
         <div class="order-property controll" v-else @click="openSelectScheduleDialog()">Schedule</div>
+        <div class="order-property controll" @click="completeOrderAsync(id)">✔</div>
         <div class="order-property controll" @click="deleteOrderAsync(id)">X</div>
     </div>
     <div id="obscure" v-if="showSchedules"></div>
@@ -95,10 +106,14 @@ function cancelOrderSchedule() {
 <style scoped>
 .order {
     display:grid;
-    grid-template-columns: 4fr 4fr 4fr 4fr 4fr 1fr;
+    grid-template-columns: 4fr 4fr 4fr 4fr 4fr 1fr 1fr;
     border-bottom: var(--border-size) dotted var(--color-text);
     border-left: var(--border-size) dotted var(--color-text);
     border-right: var(--border-size) dotted var(--color-text);
+}
+
+.completed {
+    color: var(--color-text-disabled);
 }
 
 .order:first-of-type {

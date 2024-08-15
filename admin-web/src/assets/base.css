@@ -11,6 +11,7 @@
   --color-text: #000000;
   --color-text-highlight: #9E876D;
   --color-edit-text: #ffffff;
+  --color-text-disabled: #dddddd;
 }
 
 *,
