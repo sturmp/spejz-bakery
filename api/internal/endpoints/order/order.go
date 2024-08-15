@@ -28,6 +28,7 @@ type Order struct {
 	Quantity      float32
 	PreferedDate  time.Time
 	ScheduledDate time.Time
+	Completed     bool
 }
 
 type CreateOrderRequest struct {
@@ -168,6 +169,34 @@ func DeleteOrder(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func CompleteOrder(response http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	orderId, ok := vars["id"]
+	if !ok {
+		http.Error(response, "Missing Order id!", http.StatusBadRequest)
+		return
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec("UPDATE pastryorder SET completed = ? WHERE id = ?", 1, orderId)
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+}
+
 func fetchOrdersFromDB(languageCode string) ([]Order, error) {
 	rows, err := DB.Query(`SELECT
 			pastryorder.id,
@@ -176,7 +205,8 @@ func fetchOrdersFromDB(languageCode string) ([]Order, error) {
 			pastryorder.customer,
 			pastryorder.quantity,
 			pastryorder.preferedDate,
-			pastryorder.scheduledDate FROM pastryorder
+			pastryorder.scheduledDate,
+			pastryorder.completed FROM pastryorder
 		JOIN pastry ON pastryorder.pastryid = pastry.id
 		JOIN pastrytranslation ON pastryorder.pastryid = pastrytranslation.pastryid
 			AND pastrytranslation.language = ?`, languageCode)
@@ -196,7 +226,8 @@ func fetchOrdersFromDB(languageCode string) ([]Order, error) {
 			&order.Customer,
 			&order.Quantity,
 			&preferedDateText,
-			&scheduledDateText)
+			&scheduledDateText,
+			&order.Completed)
 		if err != nil {
 			return nil, err
 		}

@@ -48,6 +48,7 @@ func main() {
 	router.HandleFunc("/order", order.GetOrders).Methods("GET")
 	router.HandleFunc("/order", order.CreateOrder).Methods("POST")
 	router.HandleFunc("/order/{id}", order.DeleteOrder).Methods("DELETE")
+	router.HandleFunc("/order/complete/{id}", order.CompleteOrder).Methods("PUT")
 	router.HandleFunc("/order/schedule", order.ScheduleOrder).Methods("POST")
 	router.HandleFunc("/schedule", bakingschedule.GetBakingSchedules).Methods("GET")
 	router.HandleFunc("/schedule", bakingschedule.CreateBakingSchedules).Methods("POST")
