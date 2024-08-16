@@ -7,10 +7,14 @@ import { fetchFromApi } from '@/modules/fetch.mjs';
 
 const schedules = ref(null);
 const editedSchedule = ref(null)
+const showOld = ref(false);
+
+const startOfWeek = calculateStartOfWeek();
 
 const url =`${import.meta.env.VITE_API_URL}/schedule`;
 async function fetchSchedulesAsync() {
     schedules.value = await (await fetchFromApi(url)).json();
+    schedules.value.sort((a, b) => a.ReadyDate < b.ReadyDate);
 }
 
 function editSchedule(schedule) {
@@ -31,13 +35,26 @@ function handleCancel() {
 }
 
 fetchSchedulesAsync();
+
+function calculateStartOfWeek() {
+    var today = new Date();
+    today.getDay();
+    return today.setDate(today.getDate()-today.getDay());
+}
 </script>
 
 <template>
     <ScheduleCreateForm @schedule-create="handleCreate()"/>
+    <div class="filters">
+        <div class="filter">
+            <span>Old</span>
+            <input type="checkbox" v-model="showOld" />
+        </div>
+    </div>
     <div>
-        <template v-for="(schedule, index) in schedules" v-bind:key=index>
-            <ScheduleItem class="row" v-if="editedSchedule == null || schedule.Pastry != editedSchedule.Pastry || schedule.ReadyDate != editedSchedule.ReadyDate"
+        <template v-for="(schedule, index) in schedules.filter(item => showOld || new Date(item.ReadyDate) >= startOfWeek)" v-bind:key=index>
+            <ScheduleItem class="row" :class="{old: new Date(schedule.ReadyDate) < startOfWeek}"
+                v-if="editedSchedule == null || schedule.Pastry != editedSchedule.Pastry || schedule.ReadyDate != editedSchedule.ReadyDate"
                 @click="editSchedule(schedule)"
                 :pastry="schedule.Pastry.Name"
                 :quantity="schedule.Quantity"
@@ -70,5 +87,9 @@ fetchSchedulesAsync();
 .row-edit {
     position: relative;
     cursor: pointer;
+}
+
+.old {
+    color: var(--color-text-disabled);
 }
 </style>

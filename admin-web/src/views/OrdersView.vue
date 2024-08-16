@@ -41,16 +41,6 @@ fetchOrdersAsync();
 </template>
 
 <style scoped>
-.filters {
-    margin-left: 0.5em;
-    margin-bottom: 1em;
-    display: flex;
-}
-
-.filter span {
-    margin-right: 0.5em;
-}
-
 .row {
     position: relative;
 }
