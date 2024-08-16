@@ -9,6 +9,7 @@ const showCompleted = ref(false);
 const url =`${import.meta.env.VITE_API_URL}/order`;
 async function fetchOrdersAsync() {
     orders.value = await (await fetchFromApi(url)).json();
+    orders.value.sort((a,b) => a.ScheduledDate < b.ScheduledDate);
 }
 
 function handleOrderModified() {
