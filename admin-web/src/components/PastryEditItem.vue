@@ -9,6 +9,7 @@ const props = defineProps({
     price: String,
     unitOfMeasure: String,
     quantityPerPiece: String,
+    enabled: Boolean,
 });
 
 const emit = defineEmits(["submit", "cancel"]);
@@ -20,6 +21,7 @@ const pastry = ref({
     price: props.price,
     unitOfMeasure: props.unitOfMeasure,
     quantityPerPiece: props.quantityPerPiece,
+    enabled: props.enabled,
 });
 
 const url =`${import.meta.env.VITE_API_URL}/pastry`;
@@ -40,11 +42,12 @@ function handleSubmit() {
 
 <template>
     <div class="pastry-edit">
-        <div class="pastry-property"><input v-model.trim="pastry.name" type="text"/></div>
-        <div class="pastry-property"><input v-model.trim="pastry.description" type="text"/></div>
-        <div class="pastry-property"><input v-model.trim="pastry.price" type="text"/></div>
-        <div class="pastry-property"><input v-model.trim="pastry.unitOfMeasure" type="text"/></div>
-        <div class="pastry-property"><input v-model.trim="pastry.quantityPerPiece" type="text"/></div>
+        <div class="pastry-property"><input class="left" v-model.trim="pastry.name" type="text"/></div>
+        <div class="pastry-property"><input class="left" v-model.trim="pastry.description" type="text"/></div>
+        <div class="pastry-property"><input class="right" v-model.trim="pastry.price" type="text"/></div>
+        <div class="pastry-property"><input class="left" v-model.trim="pastry.unitOfMeasure" type="text"/></div>
+        <div class="pastry-property"><input class="middle" v-model.trim="pastry.quantityPerPiece" type="text"/></div>
+        <div class="pastry-property"><input class="middle" v-model.trim="pastry.enabled" type="checkbox"/></div>
         <div class="controlls-group">
             <div class="controll" @click="handleSubmit()">✓</div>
             <div class="controll" @click="emit('cancel')">x</div>
@@ -57,7 +60,7 @@ function handleSubmit() {
 .pastry-edit {
     background-color: var(--edit-background-color);
     display:grid;
-    grid-template-columns: 2fr 9fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 9fr 1fr 1fr 1fr 1fr;
     border-bottom: var(--border-size) dotted var(--color-text);
     border-left: var(--border-size) dotted var(--color-text);
     border-right: var(--border-size) dotted var(--color-text);
@@ -70,6 +73,7 @@ function handleSubmit() {
 .pastry-property {
     color: var(--color-edit-text);
     display: flex;
+    padding: 0.5em 0.5em;
     border-right: var(--border-size) dotted var(--color-text);
     
     align-items: center;
@@ -79,7 +83,7 @@ function handleSubmit() {
     padding: 0.5em;
 }
 
-.pastry-property:nth-child(5) {
+.pastry-property:last-child {
     border-right: 0;
 }
 
@@ -121,7 +125,6 @@ input {
     font-size: inherit;
     font-weight: inherit;
     border: 0;
-    padding: 0.5em;
     flex: 1 1 auto;
 }
 </style>

@@ -32,3 +32,27 @@
 .filter span {
   margin-right: 0.5em;
 }
+
+div.middle {
+  justify-content: center;
+}
+
+div.left {
+  justify-content: left;
+}
+
+div.right {
+  justify-content: right;
+}
+
+input[type=text].middle {
+  text-align: center;
+}
+
+input[type=text].left {
+  text-align: left;
+}
+
+input[type=text].right {
+  text-align: right;
+}

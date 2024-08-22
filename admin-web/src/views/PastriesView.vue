@@ -59,14 +59,15 @@ initLanguage();
     <div id="container">
         <button @click="handleLanguageSwitch()">{{ language }}</button>
         <template v-for="(pastry, index) in pastries" v-bind:key=index>
-            <PastryItem class="row" v-if="editedPastry == null || pastry.Name != editedPastry.Name"
+            <PastryItem class="row" v-if="editedPastry == null || pastry.Id != editedPastry.Id"
                 @click="editPastry(pastry)"
                 :name="pastry.Name"
                 :description="pastry.Description"
                 :price="pastry.Price"
                 :unitOfMeasure="pastry.UnitOfMeasure"
-                :quantityPerPiece="pastry.QuantityPerPiece"/>
-            <template v-if="editedPastry != null && pastry.Name == editedPastry.Name">
+                :quantityPerPiece="pastry.QuantityPerPiece"
+                :enabled="pastry.Enabled"/>
+            <template v-if="editedPastry != null && pastry.Id == editedPastry.Id">
                 <PastryEditItem class="row-edit"
                     @submit="handleSubmit()"
                     @cancel="handleCancel()"
@@ -75,7 +76,8 @@ initLanguage();
                     :description="pastry.Description"
                     :price="pastry.Price"
                     :unitOfMeasure="pastry.UnitOfMeasure"
-                    :quantityPerPiece="pastry.QuantityPerPiece"/>
+                    :quantityPerPiece="pastry.QuantityPerPiece"
+                    :enabled="pastry.Enabled"/>
             </template>
         </template>
     </div>
