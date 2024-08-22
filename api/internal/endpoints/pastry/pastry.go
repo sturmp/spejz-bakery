@@ -16,6 +16,7 @@ type Pastry struct {
 	Price            string
 	UnitOfMeasure    string
 	QuantityPerPiece string
+	Enabled          bool
 }
 
 type CreatePastryRequest struct {
@@ -33,7 +34,8 @@ func GetPastries(response http.ResponseWriter, request *http.Request) {
 		pastrytranslation.description,
 		pastry.price,
 		unitofmeasuretranslation.name,
-		pastry.quantityperpiece
+		pastry.quantityperpiece,
+		pastry.enabled
 		FROM pastry
 			JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
 				AND pastrytranslation.language = ?
@@ -47,7 +49,13 @@ func GetPastries(response http.ResponseWriter, request *http.Request) {
 	pastriesFromDB := []Pastry{}
 	for rows.Next() {
 		var pastry Pastry
-		err = rows.Scan(&pastry.Id, &pastry.Name, &pastry.Description, &pastry.Price, &pastry.UnitOfMeasure, &pastry.QuantityPerPiece)
+		err = rows.Scan(&pastry.Id,
+			&pastry.Name,
+			&pastry.Description,
+			&pastry.Price,
+			&pastry.UnitOfMeasure,
+			&pastry.QuantityPerPiece,
+			&pastry.Enabled)
 		if err != nil {
 			utility.LogAndErrorResponse(err, response)
 		}
@@ -78,9 +86,10 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec("UPDATE pastry SET price=?, quantityperpiece=? WHERE id=?",
+	_, err = tx.Exec("UPDATE pastry SET price=?, quantityperpiece=?, enabled=? WHERE id=?",
 		pastry.Price,
 		pastry.QuantityPerPiece,
+		pastry.Enabled,
 		pastry.Id)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
