@@ -3,22 +3,9 @@ run-name: Api Build - ${{github.event.head_commit.message}}
 
 on:
     workflow_dispatch:
-    push:
-      paths: 
-        - api/**
-        - .github/workflows/api-deploy.yml
-      branches:
-        - main
-    pull_request:
-      paths: 
-        - api/**
-      types: [opened, synchronize, reopened, closed]
-      branches:
-        - main
 
 jobs:
     build:
-        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
         runs-on: ubuntu-latest
         permissions:
             contents: read
