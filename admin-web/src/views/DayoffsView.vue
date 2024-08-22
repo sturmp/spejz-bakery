@@ -9,6 +9,7 @@ const dayoffs = ref(null);
 const url =`${import.meta.env.VITE_API_URL}/dayoff`;
 async function fetchDayoffsAsync() {
     dayoffs.value = await (await fetchFromApi(url)).json();
+    dayoffs.value.sort((a, b) => a.Day > b.Day)
 }
 
 function handleDayoffCreated() {
