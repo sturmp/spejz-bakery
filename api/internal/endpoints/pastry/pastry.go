@@ -29,39 +29,28 @@ type CreatePastryRequest struct {
 
 func GetPastries(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)
-	rows, err := DB.Query(`SELECT pastry.id,
-		pastrytranslation.name,
-		pastrytranslation.description,
-		pastry.price,
-		unitofmeasuretranslation.name,
-		pastry.quantityperpiece,
-		pastry.enabled
-		FROM pastry
-			JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
-				AND pastrytranslation.language = ?
-			JOIN unitofmeasuretranslation ON pastry.unitofmeasure = unitofmeasuretranslation.unitofmeasureid
-				AND unitofmeasuretranslation.language = ?`, languageCode, languageCode)
+
+	pastriesFromDB, err := fetchAllPastries(languageCode)
+	enabledPastries := []Pastry{}
+	for _, pastry := range pastriesFromDB {
+		if pastry.Enabled {
+			enabledPastries = append(enabledPastries, pastry)
+		}
+	}
+
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
-	defer rows.Close()
 
-	pastriesFromDB := []Pastry{}
-	for rows.Next() {
-		var pastry Pastry
-		err = rows.Scan(&pastry.Id,
-			&pastry.Name,
-			&pastry.Description,
-			&pastry.Price,
-			&pastry.UnitOfMeasure,
-			&pastry.QuantityPerPiece,
-			&pastry.Enabled)
-		if err != nil {
-			utility.LogAndErrorResponse(err, response)
-		}
-		pastriesFromDB = append(pastriesFromDB, pastry)
-	}
-	err = rows.Err()
+	encoder := json.NewEncoder(response)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(enabledPastries)
+}
+
+func GetAllPastries(response http.ResponseWriter, request *http.Request) {
+	languageCode := utility.GetLanguageOrDefault(request)
+
+	pastriesFromDB, err := fetchAllPastries(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -163,6 +152,43 @@ func FetchPastryName(pastryId int) (string, error) {
 		return "", err
 	}
 	return pastryName, nil
+}
+
+func fetchAllPastries(languageCode string) (pastries []Pastry, err error) {
+	rows, err := DB.Query(`SELECT pastry.id,
+	pastrytranslation.name,
+	pastrytranslation.description,
+	pastry.price,
+	unitofmeasuretranslation.name,
+	pastry.quantityperpiece,
+	pastry.enabled
+	FROM pastry
+		JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
+			AND pastrytranslation.language = ?
+		JOIN unitofmeasuretranslation ON pastry.unitofmeasure = unitofmeasuretranslation.unitofmeasureid
+			AND unitofmeasuretranslation.language = ?`, languageCode, languageCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	pastries = []Pastry{}
+	for rows.Next() {
+		var pastry Pastry
+		err = rows.Scan(&pastry.Id,
+			&pastry.Name,
+			&pastry.Description,
+			&pastry.Price,
+			&pastry.UnitOfMeasure,
+			&pastry.QuantityPerPiece,
+			&pastry.Enabled)
+		if err != nil {
+			return nil, err
+		}
+		pastries = append(pastries, pastry)
+	}
+
+	return pastries, rows.Err()
 }
 
 func insertPastry(tx *sql.Tx, pastry CreatePastryRequest) (pastryId int, err error) {
