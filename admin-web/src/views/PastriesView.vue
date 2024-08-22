@@ -28,7 +28,7 @@ function handleLanguageSwitch() {
     router.go(0);
 }
 
-const url =`${import.meta.env.VITE_API_URL}/pastry`;
+const url =`${import.meta.env.VITE_API_URL}/pastry/all`;
 async function fetchPastriesAsync() {
     pastries.value = await (await fetchFromApi(url)).json();
 }
