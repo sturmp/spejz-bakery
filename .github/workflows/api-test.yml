@@ -1,0 +1,29 @@
+name: Api Test
+run-name: Api Test - ${{github.event.head_commit.message}}
+
+on:
+    workflow_dispatch:
+    push:
+        paths: 
+            - api/**
+    pull_request:
+        paths: 
+            - api/**
+        types: [opened, synchronize, reopened, closed]
+
+jobs:
+    test:
+        name: Run Tests
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+              working-directory: ./api
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            - name: Setup Go
+              uses: actions/setup-go@v5
+            - name: Get Dependencies 
+              run: go get .
+            - name: Run Tests
+              run: go test ./...
