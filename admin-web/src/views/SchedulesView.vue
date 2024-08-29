@@ -4,6 +4,7 @@ import ScheduleItem from "../components/ScheduleItem.vue"
 import ScheduleEditItem from "../components/ScheduleEditItem.vue"
 import ScheduleCreateForm from "../components/ScheduleCreateForm.vue"
 import { fetchFromApi } from '@/modules/fetch.mjs';
+import { calculateStartOfWeek } from '@/modules/datetime.mjs';
 
 const schedules = ref(null);
 const editedSchedule = ref(null)
@@ -35,12 +36,6 @@ function handleCancel() {
 }
 
 fetchSchedulesAsync();
-
-function calculateStartOfWeek() {
-    var today = new Date();
-    today.getDay();
-    return today.setDate(today.getDate()-today.getDay());
-}
 </script>
 
 <template>

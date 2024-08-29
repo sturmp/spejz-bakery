@@ -25,3 +25,9 @@ export function formatDateWithDayName(date) {
 
     return `${date.getFullYear()}-${monthString}-${dayString} ${days[date.getDay()]}`;
 }
+
+export function calculateStartOfWeek() {
+    var today = new Date();
+    today.getDay();
+    return today.setDate(today.getDate()-today.getDay());
+}
