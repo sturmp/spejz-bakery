@@ -1,9 +1,8 @@
 package auth
 
 import (
-	"api/internal/utility"
 	"net/http"
-	"net/url"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -45,113 +44,93 @@ func TestServeHTTP_MissingAuthToken(t *testing.T) {
 	request.Header = http.Header{}
 	handler := FakeHandler{}
 	auth := NewAuth(handler, "abc", "adminabc", []Endpoint{})
-	responseWriter := utility.FakeResponseWriter{}
+	responseWriter := httptest.NewRecorder()
 
-	auth.ServeHTTP(&responseWriter, &request)
+	auth.ServeHTTP(responseWriter, &request)
 
-	if responseWriter.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("Response status code should be %d not %d", http.StatusUnauthorized, responseWriter.StatusCode)
+	if responseWriter.Code != http.StatusUnauthorized {
+		t.Fatalf("Response status code should be %d not %d", http.StatusUnauthorized, responseWriter.Code)
 	}
 }
 
 func TestServeHTTP_WrongAuthToken(t *testing.T) {
-	request := http.Request{}
-	request.Header = http.Header{}
 	handler := FakeHandler{}
 	authToken := "abc"
 	path := "pastry"
 	method := "GET"
 
+	request, _ := http.NewRequest(method, path, nil)
 	request.Header.Add("AuthToken", "nsdoivnws")
-	request.URL = &url.URL{
-		Path: path,
-	}
-	request.Method = method
 	auth := NewAuth(handler, authToken, "adminabc", []Endpoint{
 		{
 			Path:   path,
 			Method: method,
 		},
 	})
-	responseWriter := utility.FakeResponseWriter{}
+	responseWriter := httptest.NewRecorder()
 
-	auth.ServeHTTP(&responseWriter, &request)
+	auth.ServeHTTP(responseWriter, request)
 
-	if responseWriter.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("Response status code should be %d not %d", http.StatusUnauthorized, responseWriter.StatusCode)
+	if responseWriter.Code != http.StatusUnauthorized {
+		t.Fatalf("Response status code should be %d not %d", http.StatusUnauthorized, responseWriter.Code)
 	}
 }
 
 func TestServeHTTP_CorrectAuthToken(t *testing.T) {
-	request := http.Request{}
-	request.Header = http.Header{}
 	handler := FakeHandler{}
 	authToken := "abc"
 	path := "pastry"
 	method := "GET"
 
+	request, _ := http.NewRequest(method, path, nil)
 	request.Header.Add("AuthToken", authToken)
-	request.URL = &url.URL{
-		Path: path,
-	}
-	request.Method = method
 	auth := NewAuth(handler, authToken, "adminabc", []Endpoint{
 		{
 			Path:   path,
 			Method: method,
 		},
 	})
-	responseWriter := utility.FakeResponseWriter{}
+	responseWriter := httptest.NewRecorder()
 
-	auth.ServeHTTP(&responseWriter, &request)
+	auth.ServeHTTP(responseWriter, request)
 
-	if responseWriter.StatusCode == http.StatusUnauthorized {
+	if responseWriter.Code == http.StatusUnauthorized {
 		t.Fatalf("Response status code should not be %d", http.StatusUnauthorized)
 	}
 }
 
 func TestServeHTTP_WrongAdminAuthToken(t *testing.T) {
-	request := http.Request{}
-	request.Header = http.Header{}
 	handler := FakeHandler{}
 	adminAuthToken := "adminabc"
 	path := "pastry"
 	method := "GET"
 
+	request, _ := http.NewRequest(method, path, nil)
 	request.Header.Add("AuthToken", "nsdoivnws")
-	request.URL = &url.URL{
-		Path: path,
-	}
-	request.Method = method
 	auth := NewAuth(handler, "abc", adminAuthToken, []Endpoint{})
-	responseWriter := utility.FakeResponseWriter{}
+	responseWriter := httptest.NewRecorder()
 
-	auth.ServeHTTP(&responseWriter, &request)
+	auth.ServeHTTP(responseWriter, request)
 
-	if responseWriter.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("Response status code should be %d not %d", http.StatusUnauthorized, responseWriter.StatusCode)
+	if responseWriter.Code != http.StatusUnauthorized {
+		t.Fatalf("Response status code should be %d not %d", http.StatusUnauthorized, responseWriter.Code)
 	}
 }
 
 func TestServeHTTP_CorrectAdminAuthToken(t *testing.T) {
-	request := http.Request{}
-	request.Header = http.Header{}
 	handler := FakeHandler{}
 	adminAuthToken := "adminabc"
 	path := "pastry"
 	method := "GET"
 
+	request, _ := http.NewRequest(method, path, nil)
 	request.Header.Add("AuthToken", adminAuthToken)
-	request.URL = &url.URL{
-		Path: path,
-	}
-	request.Method = method
 	auth := NewAuth(handler, "abc", adminAuthToken, []Endpoint{})
-	responseWriter := utility.FakeResponseWriter{}
+	responseWriter := httptest.NewRecorder()
 
-	auth.ServeHTTP(&responseWriter, &request)
+	auth.ServeHTTP(responseWriter, request)
 
-	if responseWriter.StatusCode == http.StatusUnauthorized {
+	if responseWriter.Code == http.StatusUnauthorized {
 		t.Fatalf("Response status code should not be %d", http.StatusUnauthorized)
 	}
 }

@@ -38,7 +38,6 @@ func main() {
 	pastry.DB = db
 	order.DB = db
 	bakingschedule.DB = db
-	dayoff.DB = db
 	unitofmeasure.DB = db
 
 	router := mux.NewRouter()
@@ -54,10 +53,9 @@ func main() {
 	router.HandleFunc("/schedule", bakingschedule.GetBakingSchedules).Methods("GET")
 	router.HandleFunc("/schedule", bakingschedule.CreateBakingSchedules).Methods("POST")
 	router.HandleFunc("/schedule", bakingschedule.UpdateBakingSchedule).Methods("PUT")
-	router.HandleFunc("/dayoff", dayoff.GetDayOffs).Methods("GET")
-	router.HandleFunc("/dayoff", dayoff.CreateDayOff).Methods("POST")
-	router.HandleFunc("/dayoff/{id}", dayoff.DeleteDayOff).Methods("DELETE")
 	router.HandleFunc("/unitofmeasure", unitofmeasure.GetUnitOfMeasures).Methods("GET")
+
+	dayoff.RegisterHandler(router, db)
 
 	authMiddleware := auth.NewAuth(router,
 		configuration.AppConfig.Auth.Token,

@@ -1,7 +1,9 @@
 package utility
 
 import (
+	"api/internal/utility/test"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -29,18 +31,12 @@ func TestGetLanguageOrDefault_FromHeader(t *testing.T) {
 }
 
 func TestLogAndErrorResponse_ResponseCode(t *testing.T) {
-	err := DummyError{}
-	responseWriter := FakeResponseWriter{}
+	err := test.DummyError{}
+	responseWriter := httptest.NewRecorder()
 
-	LogAndErrorResponse(err, &responseWriter)
+	LogAndErrorResponse(err, responseWriter)
 
-	if responseWriter.StatusCode != http.StatusInternalServerError {
-		t.Fatalf("StatusCode was %d instead of %d", responseWriter.StatusCode, http.StatusInternalServerError)
+	if responseWriter.Code != http.StatusInternalServerError {
+		t.Fatalf("StatusCode was %d instead of %d", responseWriter.Code, http.StatusInternalServerError)
 	}
-}
-
-type DummyError struct{}
-
-func (err DummyError) Error() string {
-	return "Error"
 }

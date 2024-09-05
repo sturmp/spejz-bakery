@@ -14,6 +14,10 @@ func GetLanguageOrDefault(request *http.Request) string {
 }
 
 func LogAndErrorResponse(err error, response http.ResponseWriter) {
+	LogAndErrorResponseWithCode(err, response, http.StatusInternalServerError)
+}
+
+func LogAndErrorResponseWithCode(err error, response http.ResponseWriter, responseCode int) {
 	log.Println(err.Error())
-	http.Error(response, "", http.StatusInternalServerError)
+	http.Error(response, "", responseCode)
 }
