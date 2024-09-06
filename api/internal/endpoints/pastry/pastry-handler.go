@@ -36,15 +36,15 @@ func GetPastries(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)
 
 	pastries, err := Repository.FetchAllPastries(languageCode)
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+	}
+
 	enabledPastries := []Pastry{}
 	for _, pastry := range pastries {
 		if pastry.Enabled {
 			enabledPastries = append(enabledPastries, pastry)
 		}
-	}
-
-	if err != nil {
-		utility.LogAndErrorResponse(err, response)
 	}
 
 	encoder := json.NewEncoder(response)
