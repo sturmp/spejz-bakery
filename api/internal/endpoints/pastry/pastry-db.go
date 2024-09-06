@@ -2,10 +2,18 @@ package pastry
 
 import "database/sql"
 
-var DB *sql.DB
+type PastrySqlRepository struct {
+	DB *sql.DB
+}
 
-func fetchAllPastries(languageCode string) (pastries []Pastry, err error) {
-	rows, err := DB.Query(`SELECT pastry.id,
+func NewPastrySqlRepository(db *sql.DB) *PastrySqlRepository {
+	return &PastrySqlRepository{
+		DB: db,
+	}
+}
+
+func (repository *PastrySqlRepository) FetchAllPastries(languageCode string) (pastries []Pastry, err error) {
+	rows, err := repository.DB.Query(`SELECT pastry.id,
 	pastrytranslation.name,
 	pastrytranslation.description,
 	pastry.price,
@@ -41,39 +49,8 @@ func fetchAllPastries(languageCode string) (pastries []Pastry, err error) {
 	return pastries, rows.Err()
 }
 
-func fetchPastry(pastryId int, languageCode string) (Pastry, error) {
-	row := DB.QueryRow(`SELECT pastry.id,
-		pastrytranslation.name,
-		pastrytranslation.description,
-		pastry.price,
-		unitofmeasuretranslation.name,
-		pastry.quantityperpiece,
-		pastry.enabled
-		FROM pastry
-			JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
-				AND pastrytranslation.language = ?
-			JOIN unitofmeasuretranslation ON pastry.unitofmeasure = unitofmeasuretranslation.unitofmeasureid
-				AND unitofmeasuretranslation.language = ?
-		WHERE pastry.id = ?`, languageCode, languageCode, pastryId)
-
-	var pastry Pastry
-
-	err := row.Scan(&pastry.Id,
-		&pastry.Name,
-		&pastry.Description,
-		&pastry.Price,
-		&pastry.UnitOfMeasure,
-		&pastry.QuantityPerPiece,
-		&pastry.Enabled)
-	if err != nil {
-		return pastry, err
-	}
-
-	return pastry, nil
-}
-
-func updatePastry(pastry Pastry, languageCode string) error {
-	tx, err := DB.Begin()
+func (repository *PastrySqlRepository) UpdatePastry(pastry Pastry, languageCode string) error {
+	tx, err := repository.DB.Begin()
 	if err != nil {
 		return err
 	}
@@ -104,10 +81,10 @@ func updatePastry(pastry Pastry, languageCode string) error {
 	return nil
 }
 
-func createPastry(pastry CreatePastryRequest) (id int, err error) {
-	tx, err := DB.Begin()
+func (repository *PastrySqlRepository) CreatePastry(createRequest CreatePastryRequest, languageCode string) (pastry Pastry, err error) {
+	tx, err := repository.DB.Begin()
 	if err != nil {
-		return -1, err
+		return pastry, err
 	}
 	defer tx.Rollback()
 
@@ -116,26 +93,61 @@ func createPastry(pastry CreatePastryRequest) (id int, err error) {
 		pastry(price, quantityperpiece, unitofmeasure)
 		VALUES(?, ?, ?)
 		RETURNING id`,
-		pastry.Price,
-		pastry.QuantityPerPiece,
-		pastry.UnitOfMeasure).Scan(&pastryId)
+		createRequest.Price,
+		createRequest.QuantityPerPiece,
+		createRequest.UnitOfMeasure).Scan(&pastryId)
 	if err != nil {
-		return -1, err
+		return pastry, err
 	}
 
-	err = insertPastryLanguages(tx, pastry, pastryId)
+	err = repository.insertPastryLanguages(tx, createRequest, pastryId)
 	if err != nil {
-		return -1, err
+		return pastry, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return -1, err
+		return pastry, err
 	}
 
-	return pastryId, nil
+	pastry, err = repository.fetchPastry(pastryId, languageCode)
+	if err != nil {
+		return Pastry{}, err
+	}
+	return pastry, nil
 }
 
-func insertPastryLanguages(tx *sql.Tx, pastry CreatePastryRequest, pastryId int) error {
+func (repository *PastrySqlRepository) fetchPastry(pastryId int, languageCode string) (Pastry, error) {
+	row := repository.DB.QueryRow(`SELECT pastry.id,
+		pastrytranslation.name,
+		pastrytranslation.description,
+		pastry.price,
+		unitofmeasuretranslation.name,
+		pastry.quantityperpiece,
+		pastry.enabled
+		FROM pastry
+			JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
+				AND pastrytranslation.language = ?
+			JOIN unitofmeasuretranslation ON pastry.unitofmeasure = unitofmeasuretranslation.unitofmeasureid
+				AND unitofmeasuretranslation.language = ?
+		WHERE pastry.id = ?`, languageCode, languageCode, pastryId)
+
+	var pastry Pastry
+
+	err := row.Scan(&pastry.Id,
+		&pastry.Name,
+		&pastry.Description,
+		&pastry.Price,
+		&pastry.UnitOfMeasure,
+		&pastry.QuantityPerPiece,
+		&pastry.Enabled)
+	if err != nil {
+		return pastry, err
+	}
+
+	return pastry, nil
+}
+
+func (repository *PastrySqlRepository) insertPastryLanguages(tx *sql.Tx, pastry CreatePastryRequest, pastryId int) error {
 	rows, err := tx.Query("SELECT DISTINCT language FROM pastrytranslation")
 	if err != nil {
 		return err

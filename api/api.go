@@ -35,7 +35,7 @@ func main() {
 	}
 	defer db.Close()
 
-	pastry.DB = db
+	pastry.Repository = pastry.NewPastrySqlRepository(db)
 	order.DB = db
 	bakingschedule.DB = db
 	unitofmeasure.DB = db

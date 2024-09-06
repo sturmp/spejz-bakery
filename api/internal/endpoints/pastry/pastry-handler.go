@@ -24,12 +24,20 @@ type CreatePastryRequest struct {
 	QuantityPerPiece string
 }
 
+type PastryRepository interface {
+	FetchAllPastries(languageCode string) ([]Pastry, error)
+	UpdatePastry(pastry Pastry, languageCode string) error
+	CreatePastry(createRequest CreatePastryRequest, languageCode string) (Pastry, error)
+}
+
+var Repository PastryRepository
+
 func GetPastries(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)
 
-	pastriesFromDB, err := fetchAllPastries(languageCode)
+	pastries, err := Repository.FetchAllPastries(languageCode)
 	enabledPastries := []Pastry{}
-	for _, pastry := range pastriesFromDB {
+	for _, pastry := range pastries {
 		if pastry.Enabled {
 			enabledPastries = append(enabledPastries, pastry)
 		}
@@ -47,7 +55,7 @@ func GetPastries(response http.ResponseWriter, request *http.Request) {
 func GetAllPastries(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)
 
-	pastriesFromDB, err := fetchAllPastries(languageCode)
+	pastriesFromDB, err := Repository.FetchAllPastries(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 	}
@@ -65,7 +73,7 @@ func UpdatePastry(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if err := updatePastry(pastry, languageCode); err != nil {
+	if err := Repository.UpdatePastry(pastry, languageCode); err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
 	}
@@ -83,13 +91,7 @@ func CreatePastry(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	id, err := createPastry(createRequest)
-	if err != nil {
-		utility.LogAndErrorResponse(err, response)
-		return
-	}
-
-	pastry, err := fetchPastry(id, languageCode)
+	pastry, err := Repository.CreatePastry(createRequest, languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
 		return
