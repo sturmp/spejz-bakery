@@ -3,7 +3,6 @@ package order
 import (
 	"api/internal/configuration"
 	"api/internal/endpoints/bakingschedule"
-	"api/internal/endpoints/pastry"
 	"api/internal/utility"
 	"database/sql"
 	"encoding/json"
@@ -322,7 +321,7 @@ func insertOrderToDb(order CreateOrderRequest, scheduledDate time.Time) error {
 
 func sendEmail(order CreateOrderRequest) {
 	config := configuration.AppConfig
-	pastryName, err := pastry.FetchPastryName(order.PastryId)
+	pastryName, err := fetchPastryName(order.PastryId)
 	if err != nil {
 		log.Printf("Failed to send email: %s", err.Error())
 		return
@@ -347,4 +346,16 @@ func sendEmail(order CreateOrderRequest) {
 	if err := client.DialAndSend(email); err != nil {
 		log.Printf("failed to send mail: %s", err)
 	}
+}
+func fetchPastryName(pastryId int) (string, error) {
+	var pastryName string
+	row := DB.QueryRow(`SELECT name
+		FROM pastry
+			JOIN pastrytranslation ON pastry.id = pastrytranslation.pastryid
+				AND pastrytranslation.language = "en"
+		WHERE id=?`, pastryId)
+	if err := row.Scan(&pastryName); err != nil {
+		return "", err
+	}
+	return pastryName, nil
 }
