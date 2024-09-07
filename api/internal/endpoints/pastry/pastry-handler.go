@@ -38,6 +38,7 @@ func GetPastries(response http.ResponseWriter, request *http.Request) {
 	pastries, err := Repository.FetchAllPastries(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
+		return
 	}
 
 	enabledPastries := []Pastry{}
@@ -58,6 +59,7 @@ func GetAllPastries(response http.ResponseWriter, request *http.Request) {
 	pastriesFromDB, err := Repository.FetchAllPastries(languageCode)
 	if err != nil {
 		utility.LogAndErrorResponse(err, response)
+		return
 	}
 
 	encoder := json.NewEncoder(response)
@@ -87,7 +89,7 @@ func CreatePastry(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)
 	var createRequest CreatePastryRequest
 	if err := json.NewDecoder(request.Body).Decode(&createRequest); err != nil {
-		http.Error(response, err.Error(), http.StatusBadRequest)
+		utility.LogAndErrorResponseWithCode(err, response, http.StatusBadRequest)
 		return
 	}
 
