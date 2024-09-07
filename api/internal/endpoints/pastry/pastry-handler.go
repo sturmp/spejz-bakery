@@ -2,8 +2,11 @@ package pastry
 
 import (
 	"api/internal/utility"
+	"database/sql"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Pastry struct {
@@ -31,6 +34,15 @@ type PastryRepository interface {
 }
 
 var Repository PastryRepository
+
+func RegisterHandler(router *mux.Router, db *sql.DB) {
+	Repository = NewPastrySqlRepository(db)
+
+	router.HandleFunc("/pastry", GetPastries).Methods("GET")
+	router.HandleFunc("/pastry/all", GetAllPastries).Methods("GET")
+	router.HandleFunc("/pastry", UpdatePastry).Methods("PUT")
+	router.HandleFunc("/pastry", CreatePastry).Methods("POST")
+}
 
 func GetPastries(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)

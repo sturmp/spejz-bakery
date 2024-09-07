@@ -35,16 +35,11 @@ func main() {
 	}
 	defer db.Close()
 
-	pastry.Repository = pastry.NewPastrySqlRepository(db)
 	order.DB = db
 	bakingschedule.DB = db
 	unitofmeasure.DB = db
 
 	router := mux.NewRouter()
-	router.HandleFunc("/pastry", pastry.GetPastries).Methods("GET")
-	router.HandleFunc("/pastry/all", pastry.GetAllPastries).Methods("GET")
-	router.HandleFunc("/pastry", pastry.UpdatePastry).Methods("PUT")
-	router.HandleFunc("/pastry", pastry.CreatePastry).Methods("POST")
 	router.HandleFunc("/order", order.GetOrders).Methods("GET")
 	router.HandleFunc("/order", order.CreateOrder).Methods("POST")
 	router.HandleFunc("/order/{id}", order.DeleteOrder).Methods("DELETE")
@@ -55,6 +50,7 @@ func main() {
 	router.HandleFunc("/schedule", bakingschedule.UpdateBakingSchedule).Methods("PUT")
 	router.HandleFunc("/unitofmeasure", unitofmeasure.GetUnitOfMeasures).Methods("GET")
 
+	pastry.RegisterHandler(router, db)
 	dayoff.RegisterHandler(router, db)
 
 	authMiddleware := auth.NewAuth(router,
