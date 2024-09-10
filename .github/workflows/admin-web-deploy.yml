@@ -3,32 +3,20 @@ run-name: Admin Web Deploy - ${{github.event.head_commit.message}}
 
 on:
     workflow_dispatch:
-    push:
-      paths: 
-        - admin-web/**
-        - .github/workflows/admin-web-deploy.yml
-      branches:
-        - main
-    pull_request:
-      paths: 
-        - admin-web/**
-      types: [opened, synchronize, reopened, closed]
-      branches:
-        - main
 
 jobs:
-    deploy:
-        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-        runs-on: self-hosted
-        name: Build Docker Image and Deploy
-        steps:
-            - uses: actions/checkout@v3
+  deploy:
+    runs-on: ["self-hosted", "deploy"]
+    name: Deploy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Build Docker Image
-              run:  docker build --build-arg VITE_API_URL=${{vars.API_URL}} --build-arg VITE_API_AUTH_ADMINTOKEN=${{secrets.AUTH_ADMINTOKEN}} -t bakery-admin-web ./admin-web
+      - name: Login to Registry
+        run: docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASS }}
 
-            - name: Remove Previous Version
-              run: docker rm -f bakery-admin-web || true
+      - name: Remove Previous Version
+        run: docker rm -f bakery-admin-web || true
 
-            - name: Create and Start Container
-              run: docker run --name bakery-admin-web -p 5174:80 -d bakery-admin-web:latest
+      - name: Create and Start Container
+        run: docker run --name bakery-admin-web --restart=always -p 5174:80 -d ${{ secrets.REGISTRY_URL }}/bakery-admin-web:latest
