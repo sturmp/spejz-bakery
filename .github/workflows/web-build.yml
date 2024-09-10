@@ -1,0 +1,31 @@
+name: Web Build
+run-name: Web Build - ${{github.event.head_commit.message}}
+
+on:
+  workflow_dispatch:
+  push:
+    paths: 
+      - web/**
+      - .github/workflows/web-build.yml
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ["self-hosted", "build"]
+    name: Build Docker Image and Publish
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Registry
+        run: docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASS }}
+
+      - name: Build Docker Image
+        run:  docker build --build-arg VITE_API_URL=${{vars.API_URL}} --build-arg VITE_API_AUTH_TOKEN=${{secrets.AUTH_TOKEN}} -t bakery-web:latest ./web
+        
+      - name: Tag Image
+        run: docker tag bakery-web:latest  ${{ secrets.REGISTRY_URL }}/bakery-web:latest
+
+      - name: Push Image
+        run: docker push ${{ secrets.REGISTRY_URL }}/bakery-web:latest
