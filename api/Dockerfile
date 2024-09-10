@@ -1,8 +1,8 @@
-FROM --platform=linux/arm64 golang:alpine as build
+FROM golang:alpine AS build
 
 ENV GO111MODULE=on
 
-RUN apk update && apk add --no-cache git build-base
+RUN apk add --no-cache build-base
 
 WORKDIR /app
 

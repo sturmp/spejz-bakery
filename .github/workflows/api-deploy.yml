@@ -2,51 +2,21 @@ name: Api Deploy
 run-name: Api Deploy - ${{github.event.head_commit.message}}
 
 on:
-    workflow_dispatch:
-    push:
-      paths: 
-        - api/**
-        - .github/workflows/api-deploy.yml
-      branches:
-        - main
-    pull_request:
-      paths: 
-        - api/**
-      types: [opened, synchronize, reopened, closed]
-      branches:
-        - main
+  workflow_dispatch:
 
 jobs:
-    test:
-      uses: ./.github/workflows/api-test.yml
-    deploy:
-        needs: test
-        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-        runs-on: self-hosted
-        name: Build Docker Image and Deploy
-        steps:
-            - uses: actions/checkout@v3
-            
-            - name: Add User Secrets to App Config
-              uses: microsoft/variable-substitution@v1
-              with:
-                files: './api/appconfig.json'
-              env:
-                Auth.Token: ${{secrets.AUTH_TOKEN}}
-                Auth.AdminToken: ${{secrets.AUTH_ADMINTOKEN}}
-                Database.Path: ${{ secrets.DATABASE_PATH }}
-                Email.From: ${{ secrets.EMAIL_FROM }}
-                Email.To: ${{ secrets.EMAIL_TO }}
-                Email.Smtp.Host: ${{ secrets.EMAIL_SMTP_HOST }}
-                Email.Smtp.Port: ${{ secrets.EMAIL_SMTP_PORT }}
-                Email.Smtp.User: ${{ secrets.EMAIL_SMTP_USER }}
-                Email.Smtp.Pass: ${{ secrets.EMAIL_SMTP_PASS }}
+  deploy:
+    runs-on: ["self-hosted", "deploy"]
+    name: Deploy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Build Docker Image
-              run: docker build -t bakery-api:latest ./api
+      - name: Login to Registry
+        run: docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASS }}
 
-            - name: Remove Previous Version
-              run: docker rm -f bakery-api || true
+      - name: Remove Previous Version
+        run: docker rm -f bakery-api || true
 
-            - name: Create and Start Container
-              run: docker run --name bakery-api -p 5555:5555 --mount source=spejz-bakery,target=/db -d bakery-api:latest
+      - name: Create and Start Container
+        run: docker run --name bakery-api --restart=always -p 5555:5555 --mount source=spejz-bakery,target=/db -d ${{ secrets.REGISTRY_URL }}/bakery-api:latest
