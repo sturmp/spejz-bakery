@@ -48,6 +48,7 @@ func main() {
 	router.HandleFunc("/schedule", bakingschedule.GetBakingSchedules).Methods("GET")
 	router.HandleFunc("/schedule", bakingschedule.CreateBakingSchedules).Methods("POST")
 	router.HandleFunc("/schedule", bakingschedule.UpdateBakingSchedule).Methods("PUT")
+	router.HandleFunc("/schedule", bakingschedule.DeleteBakingSchedule).Methods("DELETE")
 	router.HandleFunc("/unitofmeasure", unitofmeasure.GetUnitOfMeasures).Methods("GET")
 
 	pastry.RegisterHandler(router, db)

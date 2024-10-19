@@ -28,6 +28,11 @@ type UpsertBakingScheduleRequest struct {
 	ReadyDate time.Time
 }
 
+type DeleteBakingScheduleRequest struct {
+	PastryId  int
+	ReadyDate time.Time
+}
+
 func GetBakingSchedules(response http.ResponseWriter, request *http.Request) {
 	languageCode := utility.GetLanguageOrDefault(request)
 	bakingschedules, err := FetchSchedulesFromDB(languageCode)
@@ -91,6 +96,40 @@ func UpdateBakingSchedule(response http.ResponseWriter, request *http.Request) {
 	encoder := json.NewEncoder(response)
 	encoder.SetIndent("", "  ")
 	encoder.Encode(bakingSchedule)
+}
+
+func DeleteBakingSchedule(response http.ResponseWriter, request *http.Request) {
+	var bakingSchedule DeleteBakingScheduleRequest
+
+	if err := json.NewDecoder(request.Body).Decode(&bakingSchedule); err != nil {
+		http.Error(response, err.Error(), http.StatusBadRequest)
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`DELETE from bakingschedule WHERE pastryid=? AND readyDate=?`)
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(bakingSchedule.PastryId, bakingSchedule.ReadyDate.Format(time.RFC3339))
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		utility.LogAndErrorResponse(err, response)
+		return
+	}
 }
 
 func insertScheduleToDb(bakingSchedule UpsertBakingScheduleRequest) error {
